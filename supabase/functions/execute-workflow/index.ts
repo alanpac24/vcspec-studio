@@ -183,14 +183,14 @@ async function executeAgent(agent: AgentConfig, inputData: any): Promise<any> {
   console.log(`Executing agent: ${agent.name}`);
   console.log('Input data:', inputData);
 
-  // Check for Zapier webhook
-  const zapierWebhook = agent.integration_config?.zapier_webhook;
+  // Check for Pipedream webhook
+  const pipedreamWebhook = agent.integration_config?.pipedream_webhook;
   
-  if (zapierWebhook) {
-    console.log('Triggering Zapier webhook:', zapierWebhook);
+  if (pipedreamWebhook) {
+    console.log('Triggering Pipedream webhook:', pipedreamWebhook);
     
     try {
-      const response = await fetch(zapierWebhook, {
+      const response = await fetch(pipedreamWebhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -202,7 +202,7 @@ async function executeAgent(agent: AgentConfig, inputData: any): Promise<any> {
       });
 
       if (!response.ok) {
-        throw new Error(`Zapier webhook failed: ${response.status}`);
+        throw new Error(`Pipedream webhook failed: ${response.status}`);
       }
 
       const result = await response.json().catch(() => ({ 
@@ -213,11 +213,11 @@ async function executeAgent(agent: AgentConfig, inputData: any): Promise<any> {
       return {
         webhook_triggered: true,
         webhook_response: result,
-        agent_output: `${agent.name} completed via Zapier`,
+        agent_output: `${agent.name} completed via Pipedream`,
       };
     } catch (error) {
-      console.error('Zapier webhook error:', error);
-      throw new Error(`Failed to trigger Zapier webhook: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Pipedream webhook error:', error);
+      throw new Error(`Failed to trigger Pipedream webhook: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
