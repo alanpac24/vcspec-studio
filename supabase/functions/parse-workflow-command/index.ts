@@ -16,7 +16,8 @@ const WORKFLOW_TEMPLATES = {
         inputs: 'Email threads, form submissions, LinkedIn messages',
         outputs: 'Structured deal record with company name, founder, source',
         integrations: ['Gmail', 'LinkedIn', 'Forms'],
-        step_order: 1
+        step_order: 1,
+        ai_prompt: 'Extract deal information from input data. Return JSON with: company_name, founder_name, source (email/form/linkedin), email_content, priority (high/medium/low). Analyze the content to determine if this is a serious investment opportunity.'
       },
       {
         name: 'Enrichment Agent',
@@ -24,7 +25,8 @@ const WORKFLOW_TEMPLATES = {
         inputs: 'Company domain or name',
         outputs: 'Enriched profile with metrics, team, investors, news',
         integrations: ['Crunchbase', 'PitchBook', 'Dealroom'],
-        step_order: 2
+        step_order: 2,
+        ai_prompt: 'Use the fetched company data to create an enriched profile. Return JSON with: company_overview, funding_rounds (array), team_size, key_metrics (MRR, ARR, growth_rate), investors (array), recent_news (array). Focus on investment-relevant metrics.'
       },
       {
         name: 'Scoring Agent',
@@ -32,7 +34,8 @@ const WORKFLOW_TEMPLATES = {
         inputs: 'Enriched company profile',
         outputs: 'Fit score (0-100) and priority ranking',
         integrations: ['Custom ML Model'],
-        step_order: 3
+        step_order: 3,
+        ai_prompt: 'Analyze the enriched company data and score it 0-100 based on: stage fit (30%), traction (25%), team quality (25%), market opportunity (20%). Return JSON with: overall_score, stage_score, traction_score, team_score, market_score, recommendation (pass/meet/invest), reasoning (string explaining the score).'
       },
       {
         name: 'Routing & Notification Agent',
@@ -40,7 +43,8 @@ const WORKFLOW_TEMPLATES = {
         inputs: 'Scored deal with recommended owner',
         outputs: 'CRM record created, Slack notification sent',
         integrations: ['Pipedrive', 'Slack'],
-        step_order: 4
+        step_order: 4,
+        ai_prompt: 'Based on the deal score and data, prepare notification content. Return JSON with: assigned_partner (name), notification_message (string for Slack), deal_summary (3-5 key bullet points), urgency (low/medium/high), next_action (recommended next step).'
       }
     ]
   },
@@ -54,7 +58,8 @@ const WORKFLOW_TEMPLATES = {
         inputs: 'Calendar events',
         outputs: 'Meeting details with participants',
         integrations: ['Google Calendar'],
-        step_order: 1
+        step_order: 1,
+        ai_prompt: 'Extract meeting details from calendar data. Return JSON with: meeting_title, participants (array), meeting_time, duration_minutes, company_names (array extracted from meeting details), meeting_type (intro/followup/diligence).'
       },
       {
         name: 'Brief Builder Agent',
@@ -62,7 +67,8 @@ const WORKFLOW_TEMPLATES = {
         inputs: 'Calendar event, CRM data, external research',
         outputs: 'Formatted meeting brief',
         integrations: ['Notion', 'Slack'],
-        step_order: 2
+        step_order: 2,
+        ai_prompt: 'Create a comprehensive meeting brief. Return JSON with: executive_summary, company_background, last_interaction_summary, key_talking_points (array of 5-7 items), questions_to_ask (array), potential_concerns (array), recommended_approach. Make it concise but actionable.'
       }
     ]
   },
@@ -76,7 +82,8 @@ const WORKFLOW_TEMPLATES = {
         inputs: 'CRM records',
         outputs: 'Suggested corrections',
         integrations: ['Pipedrive'],
-        step_order: 1
+        step_order: 1,
+        ai_prompt: 'Analyze CRM records for data quality issues. Return JSON with: duplicates (array of duplicate pairs with confidence scores), missing_fields (array with record_id and missing_field_names), incorrect_formats (array), suggested_fixes (array with record_id, field, current_value, suggested_value, reasoning).'
       },
       {
         name: 'Approval Agent',
@@ -84,7 +91,8 @@ const WORKFLOW_TEMPLATES = {
         inputs: 'Suggested changes',
         outputs: 'Approved changes ready to execute',
         integrations: ['Slack'],
-        step_order: 2
+        step_order: 2,
+        ai_prompt: 'Format the suggested changes for human review. Return JSON with: high_confidence_changes (array - safe to auto-apply), review_required (array - need approval), notification_message (formatted text for Slack), total_issues_found (number).'
       }
     ]
   }

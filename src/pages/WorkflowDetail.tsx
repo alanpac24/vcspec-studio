@@ -66,6 +66,7 @@ const WorkflowDetail = () => {
     <WorkflowMapView
       title={workflow.name}
       agents={agents}
+      workflowId={id}
     />
   );
 };

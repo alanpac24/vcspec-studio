@@ -57,6 +57,7 @@ export const CommandBar = ({ onWorkflowCreated }: CommandBarProps) => {
           outputs: agent.outputs,
           integrations: agent.integrations,
           step_order: agent.step_order,
+          ai_prompt: agent.ai_prompt || null,
           parameters: {}
         }));
 

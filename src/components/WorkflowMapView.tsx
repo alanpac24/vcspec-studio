@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
-import { AgentDetailDrawer } from "./AgentDetailDrawer";
+import { AgentConfigDrawer } from "./AgentConfigDrawer";
 import { WorkflowRunner } from "./WorkflowRunner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Agent {
   id: string;
@@ -10,16 +11,46 @@ interface Agent {
   inputs: string;
   outputs: string;
   integrations: string[];
+  ai_prompt?: string | null;
+  integration_config?: any;
 }
 
 interface WorkflowMapViewProps {
   title: string;
-  agents: Agent[];
+  agents?: Agent[];
   workflowId?: string;
 }
 
-export const WorkflowMapView = ({ title, agents, workflowId }: WorkflowMapViewProps) => {
+export const WorkflowMapView = ({ title, agents: initialAgents, workflowId }: WorkflowMapViewProps) => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [agents, setAgents] = useState<Agent[]>(initialAgents || []);
+
+  useEffect(() => {
+    if (workflowId && !initialAgents) {
+      fetchAgents();
+    }
+  }, [workflowId]);
+
+  const fetchAgents = async () => {
+    if (!workflowId) return;
+    
+    const { data, error } = await supabase
+      .from('agent_configs')
+      .select('*')
+      .eq('workflow_id', workflowId)
+      .order('step_order');
+
+    if (error) {
+      console.error('Error fetching agents:', error);
+      return;
+    }
+
+    setAgents(data || []);
+  };
+
+  const handleAgentSaved = () => {
+    fetchAgents(); // Refresh agents after saving
+  };
 
   return (
     <div className="flex h-full">
@@ -119,9 +150,13 @@ export const WorkflowMapView = ({ title, agents, workflowId }: WorkflowMapViewPr
         </div>
       </div>
 
-      {/* Agent Detail Drawer */}
+      {/* Agent Configuration Drawer */}
       {selectedAgent && (
-        <AgentDetailDrawer agent={selectedAgent} onClose={() => setSelectedAgent(null)} />
+        <AgentConfigDrawer
+          agent={selectedAgent}
+          onClose={() => setSelectedAgent(null)}
+          onSaved={handleAgentSaved}
+        />
       )}
     </div>
   );
