@@ -14,7 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_configs: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          inputs: string | null
+          integrations: string[] | null
+          name: string
+          outputs: string | null
+          parameters: Json | null
+          step_order: number
+          workflow_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          inputs?: string | null
+          integrations?: string[] | null
+          name: string
+          outputs?: string | null
+          parameters?: Json | null
+          step_order: number
+          workflow_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          inputs?: string | null
+          integrations?: string[] | null
+          name?: string
+          outputs?: string | null
+          parameters?: Json | null
+          step_order?: number
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_configs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_runs: {
+        Row: {
+          agents_executed: number | null
+          completed_at: string | null
+          id: string
+          result: Json | null
+          started_at: string | null
+          status: string
+          workflow_id: string | null
+        }
+        Insert: {
+          agents_executed?: number | null
+          completed_at?: string | null
+          id?: string
+          result?: Json | null
+          started_at?: string | null
+          status?: string
+          workflow_id?: string | null
+        }
+        Update: {
+          agents_executed?: number | null
+          completed_at?: string | null
+          id?: string
+          result?: Json | null
+          started_at?: string | null
+          status?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_runs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflows: {
+        Row: {
+          agents: Json
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          workflow_type: string
+        }
+        Insert: {
+          agents?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          workflow_type: string
+        }
+        Update: {
+          agents?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          workflow_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
