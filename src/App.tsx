@@ -6,6 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
 import DealflowTriage from "./pages/DealflowTriage";
+import MeetingPrep from "./pages/MeetingPrep";
+import CRMHygiene from "./pages/CRMHygiene";
+import ResearchOutbound from "./pages/ResearchOutbound";
+import PortfolioLP from "./pages/PortfolioLP";
+import Fundraising from "./pages/Fundraising";
 import RunsPage from "./pages/RunsPage";
 import AgentsLibrary from "./pages/AgentsLibrary";
 import WorkflowDetail from "./pages/WorkflowDetail";
@@ -23,6 +28,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/dealflow-triage" element={<DealflowTriage />} />
+            <Route path="/meeting-prep" element={<MeetingPrep />} />
+            <Route path="/crm-hygiene" element={<CRMHygiene />} />
+            <Route path="/research-outbound" element={<ResearchOutbound />} />
+            <Route path="/portfolio-lp" element={<PortfolioLP />} />
+            <Route path="/fundraising" element={<Fundraising />} />
             <Route path="/runs" element={<RunsPage />} />
             <Route path="/agents" element={<AgentsLibrary />} />
             <Route path="/workflow/:id" element={<WorkflowDetail />} />
