@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const agents = [
   {
@@ -53,37 +54,62 @@ const agents = [
 
 const AgentsLibrary = () => {
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
-        <h1 className="text-2xl font-bold">Agents Library</h1>
-        <Button className="bg-primary text-primary-foreground">New Agent</Button>
+    <div className="max-w-7xl mx-auto">
+      <div className="px-12 pt-12 pb-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-1">Agents Library</h1>
+            <p className="text-sm text-grey-500">Browse and configure your automation agents</p>
+          </div>
+          <Button className="bg-primary text-primary-foreground hover:bg-grey-800 h-9 px-4 text-sm">
+            <Plus className="h-4 w-4 mr-2" />
+            New Agent
+          </Button>
+        </div>
       </div>
 
-      <div className="border border-border">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border bg-grey-light">
-              <th className="text-left p-3 text-sm font-bold">Name</th>
-              <th className="text-left p-3 text-sm font-bold">Purpose</th>
-              <th className="text-left p-3 text-sm font-bold">Inputs</th>
-              <th className="text-left p-3 text-sm font-bold">Outputs</th>
-              <th className="text-left p-3 text-sm font-bold">Integrations</th>
-              <th className="text-left p-3 text-sm font-bold">Last Used</th>
-            </tr>
-          </thead>
-          <tbody>
-            {agents.map((agent, idx) => (
-              <tr key={idx} className="border-b border-border hover:bg-grey-light transition-colors">
-                <td className="p-3 text-sm font-medium">{agent.name}</td>
-                <td className="p-3 text-sm text-muted-foreground">{agent.purpose}</td>
-                <td className="p-3 text-sm text-muted-foreground">{agent.inputs}</td>
-                <td className="p-3 text-sm text-muted-foreground">{agent.outputs}</td>
-                <td className="p-3 text-sm text-muted-foreground">{agent.integrations}</td>
-                <td className="p-3 text-sm text-muted-foreground">{agent.lastUsed}</td>
+      <div className="px-12 py-6">
+        <div className="border border-border bg-card overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border bg-grey-50">
+                <th className="text-left px-4 py-2.5 text-xs font-semibold text-grey-600 uppercase tracking-wide">
+                  Name
+                </th>
+                <th className="text-left px-4 py-2.5 text-xs font-semibold text-grey-600 uppercase tracking-wide">
+                  Purpose
+                </th>
+                <th className="text-left px-4 py-2.5 text-xs font-semibold text-grey-600 uppercase tracking-wide">
+                  Inputs
+                </th>
+                <th className="text-left px-4 py-2.5 text-xs font-semibold text-grey-600 uppercase tracking-wide">
+                  Outputs
+                </th>
+                <th className="text-left px-4 py-2.5 text-xs font-semibold text-grey-600 uppercase tracking-wide">
+                  Integrations
+                </th>
+                <th className="text-left px-4 py-2.5 text-xs font-semibold text-grey-600 uppercase tracking-wide">
+                  Last Used
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {agents.map((agent, idx) => (
+                <tr 
+                  key={idx} 
+                  className="border-b border-border last:border-b-0 hover:bg-grey-50 transition-colors cursor-pointer"
+                >
+                  <td className="px-4 py-3 text-sm font-medium text-foreground">{agent.name}</td>
+                  <td className="px-4 py-3 text-sm text-grey-600">{agent.purpose}</td>
+                  <td className="px-4 py-3 text-sm text-grey-600">{agent.inputs}</td>
+                  <td className="px-4 py-3 text-sm text-grey-600">{agent.outputs}</td>
+                  <td className="px-4 py-3 text-sm text-grey-600">{agent.integrations}</td>
+                  <td className="px-4 py-3 text-sm text-grey-500">{agent.lastUsed}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { WorkflowCard } from "./WorkflowCard";
 import { RunsTable } from "./RunsTable";
 import { ApprovalsQueue } from "./ApprovalsQueue";
@@ -9,31 +7,37 @@ const workflows = [
     title: "Dealflow Triage",
     description: "Capture, enrich, score, and route inbound deals automatically",
     path: "/dealflow-triage",
+    emoji: "🎯",
   },
   {
     title: "Meeting Preparation",
     description: "Generate meeting briefs with CRM history and external research",
     path: "/meeting-prep",
+    emoji: "📅",
   },
   {
     title: "CRM Hygiene",
     description: "Dedupe, fill missing fields, and maintain data quality",
     path: "/crm-hygiene",
+    emoji: "🧹",
   },
   {
     title: "Research & Outbound",
     description: "Research companies by thesis, rank fit, draft outreach",
     path: "/research-outbound",
+    emoji: "🔍",
   },
   {
     title: "Portfolio & LP Ops",
     description: "Collect updates, draft LP letters, flag risks",
     path: "/portfolio-lp",
+    emoji: "📊",
   },
   {
     title: "Fundraising / LP CRM",
     description: "Manage LP relationships and fundraising activities",
     path: "/fundraising",
+    emoji: "💼",
   },
 ];
 
@@ -77,55 +81,63 @@ const approvals = [
 
 export const Dashboard = () => {
   return (
-    <div className="p-6 space-y-6">
-      {/* Start a Workflow Section */}
-      <section>
-        <h2 className="text-lg font-bold mb-4 border-b border-border pb-2">
-          Start a Workflow
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {workflows.map((workflow) => (
-            <WorkflowCard key={workflow.path} {...workflow} />
-          ))}
-        </div>
-      </section>
+    <div className="max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="px-12 pt-12 pb-2">
+        <h1 className="text-3xl font-bold text-foreground mb-1">Dashboard</h1>
+        <p className="text-sm text-grey-500">Start a workflow or monitor recent activity</p>
+      </div>
 
-      {/* Recent Runs Section */}
-      <section>
-        <h2 className="text-lg font-bold mb-4 border-b border-border pb-2">
-          Recent Runs
-        </h2>
-        <RunsTable runs={recentRuns} />
-      </section>
+      <div className="px-12 py-6 space-y-10">
+        {/* Start a Workflow Section */}
+        <section>
+          <h2 className="text-base font-semibold mb-4 text-foreground">
+            Start a Workflow
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {workflows.map((workflow) => (
+              <WorkflowCard key={workflow.path} {...workflow} />
+            ))}
+          </div>
+        </section>
 
-      {/* Approvals Queue Section */}
-      <section>
-        <h2 className="text-lg font-bold mb-4 border-b border-border pb-2">
-          Approvals Queue
-        </h2>
-        <ApprovalsQueue approvals={approvals} />
-      </section>
+        {/* Recent Runs Section */}
+        <section>
+          <h2 className="text-base font-semibold mb-4 text-foreground">
+            Recent Runs
+          </h2>
+          <RunsTable runs={recentRuns} />
+        </section>
 
-      {/* System Health Section */}
-      <section>
-        <h2 className="text-lg font-bold mb-4 border-b border-border pb-2">
-          System Health
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="border border-border p-4">
-            <div className="text-2xl font-bold">127</div>
-            <div className="text-sm text-muted-foreground">Agent runs today</div>
+        {/* Approvals Queue Section */}
+        <section>
+          <h2 className="text-base font-semibold mb-4 text-foreground">
+            Approvals Queue
+          </h2>
+          <ApprovalsQueue approvals={approvals} />
+        </section>
+
+        {/* System Health Section */}
+        <section>
+          <h2 className="text-base font-semibold mb-4 text-foreground">
+            System Health
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="border border-border bg-card hover:bg-grey-50 transition-colors p-5">
+              <div className="text-2xl font-bold text-foreground">127</div>
+              <div className="text-sm text-grey-500 mt-1">Agent runs today</div>
+            </div>
+            <div className="border border-border bg-card hover:bg-grey-50 transition-colors p-5">
+              <div className="text-2xl font-bold text-foreground">3</div>
+              <div className="text-sm text-grey-500 mt-1">Failures</div>
+            </div>
+            <div className="border border-border bg-card hover:bg-grey-50 transition-colors p-5">
+              <div className="text-2xl font-bold text-foreground">1.2s</div>
+              <div className="text-sm text-grey-500 mt-1">Avg latency</div>
+            </div>
           </div>
-          <div className="border border-border p-4">
-            <div className="text-2xl font-bold">3</div>
-            <div className="text-sm text-muted-foreground">Failures</div>
-          </div>
-          <div className="border border-border p-4">
-            <div className="text-2xl font-bold">1.2s</div>
-            <div className="text-sm text-muted-foreground">Avg latency</div>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 };
