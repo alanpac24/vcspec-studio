@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, KeyboardEvent } from "react";
 import { NavLink } from "react-router-dom";
 import { 
   Menu, 
@@ -12,10 +12,13 @@ import {
   Box, 
   Play, 
   FileText, 
-  Settings 
+  Settings,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CommandBar } from "./CommandBar";
+import { WorkflowPreview } from "./WorkflowPreview";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface LayoutProps {
   children: ReactNode;
@@ -51,6 +54,42 @@ const navSections = [
 
 export const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [commandInput, setCommandInput] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [workflowPreview, setWorkflowPreview] = useState<any>(null);
+  const { toast } = useToast();
+
+  const handleCommandSubmit = async () => {
+    if (!commandInput.trim() || isProcessing) return;
+
+    setIsProcessing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-workflow-command', {
+        body: { command: commandInput },
+      });
+
+      if (error) throw error;
+
+      console.log('Parsed workflow:', data);
+      setWorkflowPreview(data);
+      setCommandInput("");
+    } catch (error) {
+      console.error('Error parsing command:', error);
+      toast({
+        title: "Error",
+        description: "Failed to parse command. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleCommandSubmit();
+    }
+  };
 
   return (
     <div className="flex h-screen w-full bg-background">
@@ -114,7 +153,22 @@ export const Layout = ({ children }: LayoutProps) => {
             {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
 
-          <CommandBar />
+          <div className="flex-1 max-w-2xl flex gap-2">
+            <input
+              type="text"
+              placeholder="Type to create or search workflows..."
+              value={commandInput}
+              onChange={(e) => setCommandInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={isProcessing}
+              className="flex-1 px-3 py-1.5 text-sm border border-input bg-background text-foreground placeholder:text-grey-400 focus:outline-none focus:border-grey-300 transition-colors disabled:opacity-50"
+            />
+            {isProcessing && (
+              <div className="flex items-center px-2">
+                <Loader2 className="h-4 w-4 animate-spin text-grey-500" />
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center gap-1.5">
             <Button variant="ghost" size="sm" className="h-7 text-xs text-grey-600 hover:bg-grey-100 hover:text-grey-900">
@@ -136,6 +190,14 @@ export const Layout = ({ children }: LayoutProps) => {
         {/* Content Area */}
         <main className="flex-1 overflow-auto bg-background">{children}</main>
       </div>
+
+      {/* Workflow Preview Modal */}
+      {workflowPreview && (
+        <WorkflowPreview
+          {...workflowPreview}
+          onClose={() => setWorkflowPreview(null)}
+        />
+      )}
     </div>
   );
 };

@@ -1,9 +1,93 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const WORKFLOW_TEMPLATES = {
+  'dealflow-triage': {
+    name: 'Dealflow Triage',
+    description: 'Capture, enrich, score, and route inbound deals automatically',
+    agents: [
+      {
+        name: 'Inbound Capture Agent',
+        description: 'Monitors Gmail, forms, LinkedIn intros for new deal opportunities',
+        inputs: 'Email threads, form submissions, LinkedIn messages',
+        outputs: 'Structured deal record with company name, founder, source',
+        integrations: ['Gmail', 'LinkedIn', 'Forms'],
+        step_order: 1
+      },
+      {
+        name: 'Enrichment Agent',
+        description: 'Pulls external data on company, founders, traction, funding',
+        inputs: 'Company domain or name',
+        outputs: 'Enriched profile with metrics, team, investors, news',
+        integrations: ['Crunchbase', 'PitchBook', 'Dealroom'],
+        step_order: 2
+      },
+      {
+        name: 'Scoring Agent',
+        description: 'Scores deals based on stage, sector, traction, founder fit',
+        inputs: 'Enriched company profile',
+        outputs: 'Fit score (0-100) and priority ranking',
+        integrations: ['Custom ML Model'],
+        step_order: 3
+      },
+      {
+        name: 'Routing & Notification Agent',
+        description: 'Assigns owner in Pipedrive and sends Slack alerts',
+        inputs: 'Scored deal with recommended owner',
+        outputs: 'CRM record created, Slack notification sent',
+        integrations: ['Pipedrive', 'Slack'],
+        step_order: 4
+      }
+    ]
+  },
+  'meeting-prep': {
+    name: 'Meeting Preparation',
+    description: 'Generate meeting briefs with CRM history and external research',
+    agents: [
+      {
+        name: 'Calendar Trigger Agent',
+        description: 'Detects upcoming meetings from Google Calendar',
+        inputs: 'Calendar events',
+        outputs: 'Meeting details with participants',
+        integrations: ['Google Calendar'],
+        step_order: 1
+      },
+      {
+        name: 'Brief Builder Agent',
+        description: 'Generates comprehensive meeting preparation documents',
+        inputs: 'Calendar event, CRM data, external research',
+        outputs: 'Formatted meeting brief',
+        integrations: ['Notion', 'Slack'],
+        step_order: 2
+      }
+    ]
+  },
+  'crm-hygiene': {
+    name: 'CRM Hygiene',
+    description: 'Dedupe, fill missing fields, and maintain data quality',
+    agents: [
+      {
+        name: 'Data Quality Agent',
+        description: 'Identifies and fixes CRM data issues',
+        inputs: 'CRM records',
+        outputs: 'Suggested corrections',
+        integrations: ['Pipedrive'],
+        step_order: 1
+      },
+      {
+        name: 'Approval Agent',
+        description: 'Routes corrections for human approval',
+        inputs: 'Suggested changes',
+        outputs: 'Approved changes ready to execute',
+        integrations: ['Slack'],
+        step_order: 2
+      }
+    ]
+  }
 };
 
 serve(async (req) => {
@@ -13,16 +97,33 @@ serve(async (req) => {
 
   try {
     const { command } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    
+    if (!command) {
+      return new Response(
+        JSON.stringify({ error: 'Command is required' }), 
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+      console.error('LOVABLE_API_KEY not found');
+      return new Response(
+        JSON.stringify({ error: 'AI service not configured' }), 
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
 
     console.log('Parsing command:', command);
 
-    // Call Lovable AI to parse the natural language command
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    // Call Lovable AI to parse the command
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
@@ -33,126 +134,92 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a VC workflow automation expert. Parse user commands into workflow structures.
+            content: `You are a VC workflow automation expert. Analyze user commands and classify them into one of these workflow types:
+- dealflow-triage: Commands about capturing, enriching, scoring, or routing deals
+- meeting-prep: Commands about preparing for meetings, briefing, or meeting research
+- crm-hygiene: Commands about cleaning, deduping, or maintaining CRM data quality
+- research-outbound: Commands about researching companies or outbound prospecting
+- portfolio-lp: Commands about portfolio monitoring or LP reporting
+- custom: If none of the above fit
 
-WORKFLOW TYPES:
-- dealflow_triage: Capture inbound deals, enrich data, score fit, route to CRM
-- meeting_prep: Detect meetings, pull context, generate briefs
-- crm_hygiene: Scan for duplicates/stale deals, suggest fixes
-- research_outbound: Research companies, rank fit, draft outreach
-- portfolio_lp: Collect portfolio updates, draft LP letters, flag risks
-
-AGENT TEMPLATES:
-- Inbound Capture: monitors email/forms/LinkedIn for deals
-- Enrichment: pulls external data from Crunchbase/PitchBook/Dealroom
-- Scoring: scores deals on stage/sector/traction/founder fit
-- Routing: assigns owners in Pipedrive, sends Slack alerts
-- Calendar Trigger: detects upcoming meetings
-- Brief Builder: generates meeting prep documents
-- Data Quality: identifies CRM data issues
-- Stale Deal: finds inactive deals
-- Research Pack: gathers companies by thesis
-- Fit Ranking: ranks companies by fit criteria
-- Outbound Drafting: creates personalized outreach
-- Update Collector: collects portfolio metrics
-- Portfolio Pack: aggregates portfolio data
-- LP Draft: creates LP update letters
-
-Respond ONLY with valid JSON in this format:
-{
-  "workflow_type": "dealflow_triage",
-  "name": "Dealflow Triage Workflow",
-  "description": "Automated deal processing pipeline",
-  "agents": [
-    {
-      "name": "Inbound Capture Agent",
-      "description": "Monitors Gmail, forms, LinkedIn for new deals",
-      "inputs": "Email threads, form submissions",
-      "outputs": "Structured deal record",
-      "integrations": ["Gmail", "LinkedIn", "Forms"],
-      "step_order": 1
-    }
-  ]
-}`
+Return ONLY a JSON object with: { "workflow_type": "type", "confidence": 0.0-1.0 }`
           },
           {
             role: 'user',
             content: command
           }
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "create_workflow",
-              description: "Parse a workflow from natural language",
-              parameters: {
-                type: "object",
-                properties: {
-                  workflow_type: {
-                    type: "string",
-                    enum: ["dealflow_triage", "meeting_prep", "crm_hygiene", "research_outbound", "portfolio_lp", "custom"]
-                  },
-                  name: { type: "string" },
-                  description: { type: "string" },
-                  agents: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        name: { type: "string" },
-                        description: { type: "string" },
-                        inputs: { type: "string" },
-                        outputs: { type: "string" },
-                        integrations: {
-                          type: "array",
-                          items: { type: "string" }
-                        },
-                        step_order: { type: "integer" }
-                      },
-                      required: ["name", "description", "inputs", "outputs", "integrations", "step_order"]
-                    }
-                  }
-                },
-                required: ["workflow_type", "name", "description", "agents"]
-              }
-            }
-          }
-        ],
-        tool_choice: { type: "function", function: { name: "create_workflow" } }
+        ]
+      })
+    });
+
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error('AI API error:', aiResponse.status, errorText);
+      return new Response(
+        JSON.stringify({ error: 'Failed to parse command' }), 
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    const aiData = await aiResponse.json();
+    const aiContent = aiData.choices[0].message.content;
+    console.log('AI response:', aiContent);
+
+    // Parse AI response
+    let parsedResult;
+    try {
+      // Extract JSON from potential markdown code blocks
+      const jsonMatch = aiContent.match(/```json\s*(\{[\s\S]*?\})\s*```/) || 
+                        aiContent.match(/(\{[\s\S]*?\})/);
+      const jsonStr = jsonMatch ? jsonMatch[1] : aiContent;
+      parsedResult = JSON.parse(jsonStr);
+    } catch (e) {
+      console.error('Failed to parse AI response:', e);
+      parsedResult = { workflow_type: 'custom', confidence: 0.5 };
+    }
+
+    const workflowType = parsedResult.workflow_type as string;
+    const template = WORKFLOW_TEMPLATES[workflowType as keyof typeof WORKFLOW_TEMPLATES];
+
+    if (!template) {
+      return new Response(
+        JSON.stringify({
+          workflow_type: 'custom',
+          name: 'Custom Workflow',
+          description: command,
+          agents: [],
+          confidence: parsedResult.confidence || 0.5
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log('Matched template:', workflowType);
+
+    return new Response(
+      JSON.stringify({
+        workflow_type: workflowType,
+        ...template,
+        confidence: parsedResult.confidence || 0.9
       }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
-      throw new Error(`AI Gateway error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('AI response:', JSON.stringify(data, null, 2));
-
-    // Extract the workflow structure from tool call
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
-      throw new Error('No workflow structure returned from AI');
-    }
-
-    const workflow = JSON.parse(toolCall.function.arguments);
-    
-    return new Response(JSON.stringify(workflow), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in parse-workflow-command:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
     );
   }
 });
