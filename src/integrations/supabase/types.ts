@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       agent_configs: {
         Row: {
+          ai_prompt: string | null
           created_at: string | null
           description: string | null
           id: string
@@ -29,6 +30,7 @@ export type Database = {
           workflow_id: string | null
         }
         Insert: {
+          ai_prompt?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -42,6 +44,7 @@ export type Database = {
           workflow_id?: string | null
         }
         Update: {
+          ai_prompt?: string | null
           created_at?: string | null
           description?: string | null
           id?: string

@@ -15,6 +15,7 @@ interface AgentConfig {
   step_order: number;
   inputs: string;
   outputs: string;
+  ai_prompt?: string;
 }
 
 interface AgentResult {
@@ -183,11 +184,69 @@ async function executeAgent(agent: AgentConfig, inputData: any): Promise<any> {
   console.log(`Executing agent: ${agent.name}`);
   console.log('Input data:', inputData);
 
-  // Check for Pipedream webhook
   const pipedreamWebhook = agent.integration_config?.pipedream_webhook;
+  const aiPrompt = agent.ai_prompt;
   
+  // Case 1: AI + Pipedream - Fetch data then process with AI
+  if (aiPrompt && pipedreamWebhook) {
+    console.log('Executing AI agent with Pipedream data fetch');
+    
+    try {
+      // Step 1: Fetch data from Pipedream
+      console.log('Fetching data from Pipedream:', pipedreamWebhook);
+      const webhookResponse = await fetch(pipedreamWebhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agent_name: agent.name,
+          input_data: inputData,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!webhookResponse.ok) {
+        throw new Error(`Pipedream webhook failed: ${webhookResponse.status}`);
+      }
+
+      const fetchedData = await webhookResponse.json().catch(() => ({ 
+        message: 'Data fetched successfully' 
+      }));
+
+      // Step 2: Process with AI
+      console.log('Processing fetched data with AI');
+      const aiResult = await callLovableAI(agent, { ...inputData, fetched_data: fetchedData });
+
+      return {
+        mode: 'ai_with_data',
+        fetched_data: fetchedData,
+        ai_output: aiResult,
+        agent_output: `${agent.name} completed with AI + data fetch`,
+      };
+    } catch (error) {
+      console.error('AI + Pipedream execution error:', error);
+      throw error;
+    }
+  }
+  
+  // Case 2: AI only - Process with prompt
+  if (aiPrompt) {
+    console.log('Executing AI-only agent');
+    try {
+      const aiResult = await callLovableAI(agent, inputData);
+      return {
+        mode: 'ai_only',
+        ai_output: aiResult,
+        agent_output: `${agent.name} completed with AI`,
+      };
+    } catch (error) {
+      console.error('AI execution error:', error);
+      throw error;
+    }
+  }
+  
+  // Case 3: Pipedream only - Just fetch/trigger
   if (pipedreamWebhook) {
-    console.log('Triggering Pipedream webhook:', pipedreamWebhook);
+    console.log('Executing Pipedream-only agent');
     
     try {
       const response = await fetch(pipedreamWebhook, {
@@ -211,7 +270,7 @@ async function executeAgent(agent: AgentConfig, inputData: any): Promise<any> {
       }));
 
       return {
-        webhook_triggered: true,
+        mode: 'webhook_only',
         webhook_response: result,
         agent_output: `${agent.name} completed via Pipedream`,
       };
@@ -221,57 +280,92 @@ async function executeAgent(agent: AgentConfig, inputData: any): Promise<any> {
     }
   }
 
-  // Simulated execution for agents without integrations
-  console.log('No webhook configured, simulating execution');
-  
-  // Simulate processing time
+  // Case 4: No configuration - Simulate
+  console.log('No configuration, simulating execution');
   await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
 
-  // Generate mock output based on agent type
   const mockOutput: any = {
+    mode: 'simulated',
     agent_name: agent.name,
     execution_timestamp: new Date().toISOString(),
     simulated: true,
   };
 
-  // Add agent-specific mock data
   if (agent.name.includes('Capture')) {
     mockOutput.captured_items = 3;
-    mockOutput.sources = ['Email', 'Form', 'LinkedIn'];
     mockOutput.deals = [
       { company: 'Acme AI', source: 'Email', priority: 'high' },
       { company: 'Beta Corp', source: 'Form', priority: 'medium' },
-      { company: 'Gamma Tech', source: 'LinkedIn', priority: 'low' },
     ];
   } else if (agent.name.includes('Enrichment')) {
-    mockOutput.enriched_count = inputData.deals?.length || 3;
-    mockOutput.data_sources = agent.integrations;
     mockOutput.enriched_deals = inputData.deals?.map((deal: any) => ({
       ...deal,
       funding: '$2M',
       stage: 'Series A',
-      employees: '15-50',
-      founded: '2022',
     }));
   } else if (agent.name.includes('Scoring')) {
-    mockOutput.scored_count = inputData.enriched_deals?.length || 3;
     mockOutput.scores = inputData.enriched_deals?.map((deal: any) => ({
       ...deal,
       fit_score: Math.floor(Math.random() * 40) + 60,
-      reasons: ['Strong founder', 'Good traction', 'Right stage'],
     }));
-  } else if (agent.name.includes('Routing') || agent.name.includes('Notification')) {
-    mockOutput.notified = true;
-    mockOutput.channels = agent.integrations;
-    mockOutput.recipients = ['team@vc.com'];
-    mockOutput.crm_updated = true;
-  } else if (agent.name.includes('Brief')) {
-    mockOutput.brief_generated = true;
-    mockOutput.sections = ['Company Overview', 'Recent Activity', 'Talking Points'];
-  } else if (agent.name.includes('Quality')) {
-    mockOutput.issues_found = 5;
-    mockOutput.fixes_suggested = ['Dedupe 2 contacts', 'Fill 3 missing fields'];
   }
 
   return mockOutput;
+}
+
+async function callLovableAI(agent: AgentConfig, inputData: any): Promise<any> {
+  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+  if (!lovableApiKey) {
+    throw new Error('LOVABLE_API_KEY not configured');
+  }
+
+  console.log('Calling Lovable AI with prompt:', agent.ai_prompt);
+
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${lovableApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        {
+          role: 'system',
+          content: `You are ${agent.name}. ${agent.description}\n\nYour task: ${agent.ai_prompt}\n\nReturn structured JSON output that the next agent can use.`
+        },
+        {
+          role: 'user',
+          content: `Process this data:\n\n${JSON.stringify(inputData, null, 2)}`
+        }
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Lovable AI error:', response.status, errorText);
+    
+    if (response.status === 429) {
+      throw new Error('AI rate limit exceeded. Please try again later.');
+    }
+    if (response.status === 402) {
+      throw new Error('AI credits exhausted. Please add credits to continue.');
+    }
+    throw new Error(`AI request failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const aiOutput = data.choices?.[0]?.message?.content;
+
+  if (!aiOutput) {
+    throw new Error('No output from AI');
+  }
+
+  // Try to parse as JSON, fall back to raw text
+  try {
+    return JSON.parse(aiOutput);
+  } catch {
+    return { ai_response: aiOutput };
+  }
 }
