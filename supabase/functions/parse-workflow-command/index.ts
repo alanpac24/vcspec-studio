@@ -95,6 +95,105 @@ const WORKFLOW_TEMPLATES = {
         ai_prompt: 'Format the suggested changes for human review. Return JSON with: high_confidence_changes (array - safe to auto-apply), review_required (array - need approval), notification_message (formatted text for Slack), total_issues_found (number).'
       }
     ]
+  },
+  'research-outbound': {
+    name: 'Research & Outbound',
+    description: 'Research companies by thesis, rank fit, draft outreach',
+    agents: [
+      {
+        name: 'Company Research Agent',
+        description: 'Finds companies matching investment thesis',
+        inputs: 'Investment thesis, target criteria',
+        outputs: 'List of potential companies with basic data',
+        integrations: ['Crunchbase', 'LinkedIn', 'Web Search'],
+        step_order: 1,
+        ai_prompt: 'Research companies matching the investment criteria. Return JSON with: companies (array with company_name, website, description, funding_stage, why_match), total_found (number), search_queries_used (array). Focus on companies that align with the thesis.'
+      },
+      {
+        name: 'Fit Ranking Agent',
+        description: 'Scores and ranks companies by strategic fit',
+        inputs: 'Company profiles',
+        outputs: 'Ranked list with fit scores',
+        integrations: ['Custom ML Model'],
+        step_order: 2,
+        ai_prompt: 'Score each company on strategic fit. Return JSON with: ranked_companies (array with company_name, fit_score 0-100, fit_reasoning, stage_match, market_match, team_match), top_3_picks (array), pass_list (companies below threshold). Prioritize strategic alignment.'
+      },
+      {
+        name: 'Outreach Drafting Agent',
+        description: 'Generates personalized outreach messages',
+        inputs: 'Top-ranked companies',
+        outputs: 'Draft emails with personalization',
+        integrations: ['Gmail'],
+        step_order: 3,
+        ai_prompt: 'Draft personalized outreach emails for top companies. Return JSON with: emails (array with to_company, subject_line, email_body, personalization_notes), key_talking_points (array), follow_up_strategy. Make emails authentic and value-focused.'
+      }
+    ]
+  },
+  'portfolio-lp': {
+    name: 'Portfolio & LP Ops',
+    description: 'Collect updates, draft LP letters, flag risks',
+    agents: [
+      {
+        name: 'Portfolio Data Collector',
+        description: 'Gathers metrics and updates from portfolio companies',
+        inputs: 'Portfolio company list',
+        outputs: 'Aggregated performance data',
+        integrations: ['Email', 'Notion', 'Airtable'],
+        step_order: 1,
+        ai_prompt: 'Collect and structure portfolio company updates. Return JSON with: companies (array with company_name, mrr, burn_rate, runway_months, headcount, key_metrics), red_flags (array), positive_developments (array), data_completeness (percentage). Flag missing critical data.'
+      },
+      {
+        name: 'Risk Analysis Agent',
+        description: 'Identifies portfolio companies at risk',
+        inputs: 'Portfolio performance data',
+        outputs: 'Risk assessment and alerts',
+        integrations: ['Slack'],
+        step_order: 2,
+        ai_prompt: 'Analyze portfolio for risks. Return JSON with: high_risk_companies (array with company, risk_factors, severity_score, recommended_actions), runway_alerts (companies < 6mo), performance_concerns (array), overall_portfolio_health (score 0-100). Be conservative in risk assessment.'
+      },
+      {
+        name: 'LP Letter Drafting Agent',
+        description: 'Generates quarterly LP update letters',
+        inputs: 'Portfolio data, fund performance',
+        outputs: 'Draft LP letter',
+        integrations: ['Notion', 'Email'],
+        step_order: 3,
+        ai_prompt: 'Draft quarterly LP update letter. Return JSON with: executive_summary, portfolio_highlights (array), new_investments (array), exits_or_markups (array), key_metrics_summary, market_commentary, next_quarter_outlook. Maintain professional, transparent tone.'
+      }
+    ]
+  },
+  'fundraising': {
+    name: 'Fundraising / LP CRM',
+    description: 'Manage LP relationships and fundraising activities',
+    agents: [
+      {
+        name: 'LP Engagement Tracker',
+        description: 'Monitors LP interactions and touchpoints',
+        inputs: 'Email history, meeting notes, calendar',
+        outputs: 'LP engagement scores',
+        integrations: ['Gmail', 'Calendar', 'Pipedrive'],
+        step_order: 1,
+        ai_prompt: 'Track LP engagement levels. Return JSON with: lps (array with name, last_contact_date, total_interactions_90d, engagement_score 0-100, relationship_status, next_action), low_engagement_alerts (array), vip_lps_needing_attention (array). Prioritize relationship quality.'
+      },
+      {
+        name: 'Fundraising Pipeline Agent',
+        description: 'Manages fundraising pipeline and commitments',
+        inputs: 'LP conversations, commitment status',
+        outputs: 'Pipeline forecast',
+        integrations: ['Pipedrive', 'Notion'],
+        step_order: 2,
+        ai_prompt: 'Analyze fundraising pipeline. Return JSON with: total_committed, soft_circles (amount and LP names), active_conversations (array), expected_close_date, commitment_by_lp_type (breakdown), confidence_adjusted_forecast. Track momentum and confidence levels.'
+      },
+      {
+        name: 'LP Communication Agent',
+        description: 'Drafts personalized LP updates',
+        inputs: 'LP data, fund updates',
+        outputs: 'Personalized messages',
+        integrations: ['Email'],
+        step_order: 3,
+        ai_prompt: 'Create personalized LP communications. Return JSON with: messages (array with lp_name, message_type, content, personalization_elements), segmentation_strategy (how message varies by LP type), key_asks (if fundraising), tone (formal/casual based on relationship). Maintain authentic voice.'
+      }
+    ]
   }
 };
 
@@ -148,6 +247,7 @@ serve(async (req) => {
 - crm-hygiene: Commands about cleaning, deduping, or maintaining CRM data quality
 - research-outbound: Commands about researching companies or outbound prospecting
 - portfolio-lp: Commands about portfolio monitoring or LP reporting
+- fundraising: Commands about managing LP relationships, fundraising pipeline, or investor communications
 - custom: If none of the above fit
 
 Return ONLY a JSON object with: { "workflow_type": "type", "confidence": 0.0-1.0 }`

@@ -156,18 +156,28 @@ export const Layout = ({ children }: LayoutProps) => {
           <div className="flex-1 max-w-2xl flex gap-2">
             <input
               type="text"
-              placeholder="Type to create or search workflows..."
+              placeholder="Type to create or search workflows... (e.g., 'automate deal scoring')"
               value={commandInput}
               onChange={(e) => setCommandInput(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={isProcessing}
-              className="flex-1 px-3 py-1.5 text-sm border border-input bg-background text-foreground placeholder:text-grey-400 focus:outline-none focus:border-grey-300 transition-colors disabled:opacity-50"
+              className="flex-1 px-3 py-1.5 text-sm border border-input bg-background text-foreground placeholder:text-grey-400 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
             />
-            {isProcessing && (
-              <div className="flex items-center px-2">
-                <Loader2 className="h-4 w-4 animate-spin text-grey-500" />
-              </div>
-            )}
+            <Button
+              onClick={handleCommandSubmit}
+              disabled={isProcessing || !commandInput.trim()}
+              size="sm"
+              className="h-8 px-4 whitespace-nowrap"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Create'
+              )}
+            </Button>
           </div>
 
           <div className="flex items-center gap-1.5">
