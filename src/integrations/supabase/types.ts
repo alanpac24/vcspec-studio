@@ -118,6 +118,9 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          schedule_cron: string | null
+          schedule_enabled: boolean | null
+          trigger_type: string | null
           updated_at: string | null
           workflow_type: string
         }
@@ -127,6 +130,9 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          schedule_cron?: string | null
+          schedule_enabled?: boolean | null
+          trigger_type?: string | null
           updated_at?: string | null
           workflow_type: string
         }
@@ -136,6 +142,9 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          schedule_cron?: string | null
+          schedule_enabled?: boolean | null
+          trigger_type?: string | null
           updated_at?: string | null
           workflow_type?: string
         }

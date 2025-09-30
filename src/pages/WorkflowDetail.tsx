@@ -67,6 +67,7 @@ const WorkflowDetail = () => {
       title={workflow.name}
       agents={agents}
       workflowId={id}
+      workflow={workflow}
     />
   );
 };

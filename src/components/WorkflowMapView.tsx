@@ -19,9 +19,10 @@ interface WorkflowMapViewProps {
   title: string;
   agents?: Agent[];
   workflowId?: string;
+  workflow?: any;
 }
 
-export const WorkflowMapView = ({ title, agents: initialAgents, workflowId }: WorkflowMapViewProps) => {
+export const WorkflowMapView = ({ title, agents: initialAgents, workflowId, workflow }: WorkflowMapViewProps) => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [agents, setAgents] = useState<Agent[]>(initialAgents || []);
 
@@ -65,7 +66,12 @@ export const WorkflowMapView = ({ title, agents: initialAgents, workflowId }: Wo
           {/* Workflow Runner */}
           {workflowId && (
             <div className="px-12 pb-6">
-              <WorkflowRunner workflowId={workflowId} workflowName={title} />
+              <WorkflowRunner
+                workflowId={workflowId}
+                workflowName={title}
+                scheduleEnabled={workflow?.schedule_enabled}
+                scheduleCron={workflow?.schedule_cron}
+              />
             </div>
           )}
 
