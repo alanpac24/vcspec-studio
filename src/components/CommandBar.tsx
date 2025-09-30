@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { IntegrationSetupModal } from "./IntegrationSetupModal";
+import { Button } from "@/components/ui/button";
 
 interface CommandBarProps {
   onWorkflowCreated?: () => void;
@@ -62,6 +63,8 @@ export const CommandBar = ({ onWorkflowCreated }: CommandBarProps) => {
         description: error instanceof Error ? error.message : "Failed to create workflow",
         variant: "destructive",
       });
+      setIsProcessing(false);
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -123,26 +126,37 @@ export const CommandBar = ({ onWorkflowCreated }: CommandBarProps) => {
         description: error instanceof Error ? error.message : "Failed to create workflow",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   return (
     <>
-      <div className="flex-1 max-w-2xl relative">
+      <div className="flex-1 max-w-2xl relative flex gap-2">
         <input
           type="text"
-          placeholder="Type to create or search workflows..."
+          placeholder="Type to create or search workflows... (e.g., 'automate deal triage')"
           value={command}
           onChange={(e) => setCommand(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isProcessing}
-          className="w-full px-3 py-1.5 text-sm border border-input bg-background text-foreground placeholder:text-grey-400 focus:outline-none focus:border-grey-300 transition-colors disabled:opacity-50"
+          className="flex-1 px-4 py-2 text-sm border border-input bg-background text-foreground placeholder:text-grey-400 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
         />
-        {isProcessing && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <Loader2 className="h-4 w-4 animate-spin text-grey-400" />
-          </div>
-        )}
+        <Button
+          onClick={processCommand}
+          disabled={isProcessing || !command.trim()}
+          className="px-6 whitespace-nowrap"
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            'Create Workflow'
+          )}
+        </Button>
       </div>
 
       {showIntegrationModal && pendingWorkflow && (
