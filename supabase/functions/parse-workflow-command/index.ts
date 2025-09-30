@@ -247,16 +247,51 @@ Return ONLY valid JSON:
 
       let customWorkflow;
       try {
-        const jsonMatch = customContent.match(/```json\s*(\{[\s\S]*?\})\s*```/) || 
-                          customContent.match(/(\{[\s\S]*?\})/);
-        const jsonStr = jsonMatch ? jsonMatch[1] : customContent;
+        // Try to extract JSON from markdown code blocks or raw JSON
+        const jsonMatch = customContent.match(/```json\s*([\s\S]*?)\s*```/) || 
+                          customContent.match(/```\s*([\s\S]*?)\s*```/) ||
+                          customContent.match(/(\{[\s\S]*\})/);
+        const jsonStr = jsonMatch ? jsonMatch[1].trim() : customContent.trim();
         customWorkflow = JSON.parse(jsonStr);
+        
+        // Validate and ensure agents have required fields
+        if (!customWorkflow.agents || customWorkflow.agents.length === 0) {
+          throw new Error('No agents generated');
+        }
+
+        // Ensure each agent has required fields
+        customWorkflow.agents = customWorkflow.agents.map((agent: any, idx: number) => ({
+          name: agent.name || `Agent ${idx + 1}`,
+          description: agent.description || 'Automated agent',
+          inputs: agent.inputs || 'Data from previous step',
+          outputs: agent.outputs || 'Processed data',
+          integrations: Array.isArray(agent.integrations) ? agent.integrations : [],
+          ai_prompt: agent.ai_prompt || `Process the input data for step ${idx + 1}`,
+          step_order: agent.step_order || idx + 1,
+        }));
+
+        console.log('Parsed custom workflow:', customWorkflow);
+
       } catch (e) {
         console.error('Failed to parse custom workflow:', e);
-        return new Response(
-          JSON.stringify({ error: 'Failed to parse workflow design' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        console.error('Raw AI response:', customContent);
+        
+        // Fallback: Create a basic workflow
+        customWorkflow = {
+          name: 'Custom Workflow',
+          description: command,
+          agents: [
+            {
+              name: 'Data Processing Agent',
+              description: 'Processes input data according to your requirements',
+              inputs: 'Trigger data',
+              outputs: 'Processed results',
+              integrations: ['Pipedream'],
+              ai_prompt: `Based on this request: "${command}", analyze and process the input data appropriately. Return structured JSON output.`,
+              step_order: 1,
+            }
+          ]
+        };
       }
 
       return new Response(
