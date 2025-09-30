@@ -20,6 +20,7 @@ export type Database = {
           description: string | null
           id: string
           inputs: string | null
+          integration_config: Json | null
           integrations: string[] | null
           name: string
           outputs: string | null
@@ -32,6 +33,7 @@ export type Database = {
           description?: string | null
           id?: string
           inputs?: string | null
+          integration_config?: Json | null
           integrations?: string[] | null
           name: string
           outputs?: string | null
@@ -44,6 +46,7 @@ export type Database = {
           description?: string | null
           id?: string
           inputs?: string | null
+          integration_config?: Json | null
           integrations?: string[] | null
           name?: string
           outputs?: string | null
@@ -63,8 +66,10 @@ export type Database = {
       }
       workflow_runs: {
         Row: {
+          agent_results: Json | null
           agents_executed: number | null
           completed_at: string | null
+          error_message: string | null
           id: string
           result: Json | null
           started_at: string | null
@@ -72,8 +77,10 @@ export type Database = {
           workflow_id: string | null
         }
         Insert: {
+          agent_results?: Json | null
           agents_executed?: number | null
           completed_at?: string | null
+          error_message?: string | null
           id?: string
           result?: Json | null
           started_at?: string | null
@@ -81,8 +88,10 @@ export type Database = {
           workflow_id?: string | null
         }
         Update: {
+          agent_results?: Json | null
           agents_executed?: number | null
           completed_at?: string | null
+          error_message?: string | null
           id?: string
           result?: Json | null
           started_at?: string | null

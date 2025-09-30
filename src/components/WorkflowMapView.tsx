@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { AgentDetailDrawer } from "./AgentDetailDrawer";
+import { WorkflowRunner } from "./WorkflowRunner";
 
 interface Agent {
   id: string;
@@ -14,9 +15,10 @@ interface Agent {
 interface WorkflowMapViewProps {
   title: string;
   agents: Agent[];
+  workflowId?: string;
 }
 
-export const WorkflowMapView = ({ title, agents }: WorkflowMapViewProps) => {
+export const WorkflowMapView = ({ title, agents, workflowId }: WorkflowMapViewProps) => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
   return (
@@ -28,6 +30,13 @@ export const WorkflowMapView = ({ title, agents }: WorkflowMapViewProps) => {
             <h1 className="text-3xl font-bold text-foreground mb-1">{title}</h1>
             <p className="text-sm text-grey-500">Configure and run your automated workflow</p>
           </div>
+
+          {/* Workflow Runner */}
+          {workflowId && (
+            <div className="px-12 pb-6">
+              <WorkflowRunner workflowId={workflowId} workflowName={title} />
+            </div>
+          )}
 
           {/* Workflow Canvas */}
           <div className="px-12 pb-12">

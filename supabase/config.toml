@@ -2,3 +2,6 @@ project_id = "znffhxidyoemzsenshge"
 
 [functions.parse-workflow-command]
 verify_jwt = false
+
+[functions.execute-workflow]
+verify_jwt = false

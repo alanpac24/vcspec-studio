@@ -36,7 +36,10 @@ const agents = [
 ];
 
 const DealflowTriage = () => {
-  return <WorkflowMapView title="Dealflow Triage" agents={agents} />;
+  // In a real app, this would fetch from the database
+  const workflowId = "demo-dealflow-triage";
+  
+  return <WorkflowMapView title="Dealflow Triage" agents={agents} workflowId={workflowId} />;
 };
 
 export default DealflowTriage;
