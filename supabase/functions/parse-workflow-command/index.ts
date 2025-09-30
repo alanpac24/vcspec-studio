@@ -192,14 +192,80 @@ Return ONLY a JSON object with: { "workflow_type": "type", "confidence": 0.0-1.0
     const workflowType = parsedResult.workflow_type as string;
     const template = WORKFLOW_TEMPLATES[workflowType as keyof typeof WORKFLOW_TEMPLATES];
 
+    // If no template match, use AI to generate custom workflow
     if (!template) {
+      console.log('No template found, generating custom workflow with AI');
+      
+      const customWorkflowResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a workflow automation expert. Given a user's request, design a multi-step workflow with 2-4 agents.
+
+For each agent, provide:
+- name: Clear, action-oriented name (e.g., "News Fetcher Agent")
+- description: What this agent does
+- inputs: What data it receives
+- outputs: What data it produces
+- integrations: Array of tools needed (e.g., ["Gmail", "Slack", "RSS Feeds", "Pipedrive"])
+- ai_prompt: Detailed instructions for AI on what to do with the data
+- step_order: 1, 2, 3, etc.
+
+Return ONLY valid JSON:
+{
+  "name": "Workflow Name",
+  "description": "Brief description",
+  "agents": [array of agents]
+}`
+            },
+            {
+              role: 'user',
+              content: `Create a workflow for: ${command}`
+            }
+          ]
+        })
+      });
+
+      if (!customWorkflowResponse.ok) {
+        console.error('Failed to generate custom workflow');
+        return new Response(
+          JSON.stringify({ error: 'Failed to generate workflow' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const customData = await customWorkflowResponse.json();
+      const customContent = customData.choices[0].message.content;
+      console.log('AI generated workflow:', customContent);
+
+      let customWorkflow;
+      try {
+        const jsonMatch = customContent.match(/```json\s*(\{[\s\S]*?\})\s*```/) || 
+                          customContent.match(/(\{[\s\S]*?\})/);
+        const jsonStr = jsonMatch ? jsonMatch[1] : customContent;
+        customWorkflow = JSON.parse(jsonStr);
+      } catch (e) {
+        console.error('Failed to parse custom workflow:', e);
+        return new Response(
+          JSON.stringify({ error: 'Failed to parse workflow design' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       return new Response(
         JSON.stringify({
           workflow_type: 'custom',
-          name: 'Custom Workflow',
-          description: command,
-          agents: [],
-          confidence: parsedResult.confidence || 0.5
+          name: customWorkflow.name || 'Custom Workflow',
+          description: customWorkflow.description || command,
+          agents: customWorkflow.agents || [],
+          confidence: 0.8
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
