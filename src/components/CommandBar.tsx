@@ -26,14 +26,21 @@ export const CommandBar = ({ onWorkflowCreated }: CommandBarProps) => {
 
   const processCommand = async () => {
     setIsProcessing(true);
+    console.log('Processing command:', command);
 
     try {
       // Call edge function to parse the command
+      console.log('Calling parse-workflow-command edge function...');
       const { data, error } = await supabase.functions.invoke('parse-workflow-command', {
         body: { command }
       });
 
-      if (error) throw error;
+      console.log('Edge function response:', { data, error });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
 
       console.log('Parsed workflow:', data);
 
