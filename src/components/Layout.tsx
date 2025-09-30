@@ -15,6 +15,7 @@ import {
   Settings 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CommandBar } from "./CommandBar";
 
 interface LayoutProps {
   children: ReactNode;
@@ -113,13 +114,7 @@ export const Layout = ({ children }: LayoutProps) => {
             {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
 
-          <div className="flex-1 max-w-2xl">
-            <input
-              type="text"
-              placeholder="Type to create or search workflows..."
-              className="w-full px-3 py-1.5 text-sm border border-input bg-background text-foreground placeholder:text-grey-400 focus:outline-none focus:border-grey-300 transition-colors"
-            />
-          </div>
+          <CommandBar />
 
           <div className="flex items-center gap-1.5">
             <Button variant="ghost" size="sm" className="h-7 text-xs text-grey-600 hover:bg-grey-100 hover:text-grey-900">
