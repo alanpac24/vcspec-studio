@@ -13,12 +13,22 @@ import {
   Play, 
   FileText, 
   Settings,
-  Loader2
+  Loader2,
+  LogOut,
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WorkflowPreview } from "./WorkflowPreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 interface LayoutProps {
   children: ReactNode;
@@ -58,6 +68,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [workflowPreview, setWorkflowPreview] = useState<any>(null);
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
 
   const handleCommandSubmit = async () => {
     if (!commandInput.trim() || isProcessing) return;
@@ -196,8 +207,31 @@ export const Layout = ({ children }: LayoutProps) => {
             </Button>
           </div>
 
-          <div className="ml-2 flex items-center gap-2 px-2 py-1 text-xs text-grey-600">
-            <div className="w-5 h-5 bg-grey-300" />
+          <div className="ml-2 flex items-center gap-2">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 px-2 gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="text-xs">{user.email?.split('@')[0]}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled className="text-xs">
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut} className="text-xs">
+                    <LogOut className="h-3 w-3 mr-2" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+                <NavLink to="/auth">Sign in</NavLink>
+              </Button>
+            )}
           </div>
         </header>
 

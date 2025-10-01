@@ -14,6 +14,7 @@ import Fundraising from "./pages/Fundraising";
 import RunsPage from "./pages/RunsPage";
 import AgentsLibrary from "./pages/AgentsLibrary";
 import WorkflowDetail from "./pages/WorkflowDetail";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
       <BrowserRouter>
         <Layout>
           <Routes>
+            <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<Index />} />
             <Route path="/dealflow-triage" element={<DealflowTriage />} />
             <Route path="/meeting-prep" element={<MeetingPrep />} />

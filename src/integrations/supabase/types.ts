@@ -67,6 +67,36 @@ export type Database = {
           },
         ]
       }
+      connected_accounts: {
+        Row: {
+          account_id: string
+          account_name: string | null
+          app_name: string
+          connected_at: string
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          account_name?: string | null
+          app_name: string
+          connected_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          account_name?: string | null
+          app_name?: string
+          connected_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       workflow_runs: {
         Row: {
           agent_results: Json | null

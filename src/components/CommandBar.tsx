@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { IntegrationSetupModal } from "./IntegrationSetupModal";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CommandBarProps {
   onWorkflowCreated?: () => void;
@@ -17,14 +18,34 @@ export const CommandBar = ({ onWorkflowCreated }: CommandBarProps) => {
   const [pendingWorkflow, setPendingWorkflow] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && command.trim() && !isProcessing) {
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to create workflows",
+          variant: "destructive",
+        });
+        navigate('/auth');
+        return;
+      }
       await processCommand();
     }
   };
 
   const processCommand = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to create workflows",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
     setIsProcessing(true);
     console.log('Processing command:', command);
 

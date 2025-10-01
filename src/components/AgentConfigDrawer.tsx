@@ -2,10 +2,10 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PipedreamConnect } from "./PipedreamConnect";
 
 interface Agent {
   id: string;
@@ -24,9 +24,6 @@ interface AgentConfigDrawerProps {
 
 export const AgentConfigDrawer = ({ agent, onClose, onSaved }: AgentConfigDrawerProps) => {
   const [aiPrompt, setAiPrompt] = useState(agent.ai_prompt || "");
-  const [pipedreamWebhook, setPipedreamWebhook] = useState(
-    agent.integration_config?.pipedream_webhook || ""
-  );
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
@@ -37,10 +34,6 @@ export const AgentConfigDrawer = ({ agent, onClose, onSaved }: AgentConfigDrawer
         .from('agent_configs')
         .update({
           ai_prompt: aiPrompt || null,
-          integration_config: {
-            ...agent.integration_config,
-            pipedream_webhook: pipedreamWebhook || null,
-          },
         })
         .eq('id', agent.id);
 
@@ -102,50 +95,31 @@ export const AgentConfigDrawer = ({ agent, onClose, onSaved }: AgentConfigDrawer
             </p>
           </div>
 
-          {/* Pipedream Webhook Section */}
+          {/* Integrations Section */}
           <div className="space-y-3">
             <div>
-              <Label className="text-sm font-semibold">Pipedream Webhook URL</Label>
+              <Label className="text-sm font-semibold">Connected Integrations</Label>
               <p className="text-xs text-grey-500 mt-1">
-                Optional: Add a Pipedream workflow to fetch data from {agent.integrations.join(', ')}
+                Connect {agent.integrations.join(', ')} to enable real-time data fetching
               </p>
             </div>
-            <Input
-              value={pipedreamWebhook}
-              onChange={(e) => setPipedreamWebhook(e.target.value)}
-              placeholder="https://your-workflow.m.pipedream.net"
-              className="text-sm font-mono"
-            />
-            <p className="text-xs text-grey-500">
-              💡 If both AI prompt and webhook are set, the agent will: fetch data via webhook → process with AI
-            </p>
-          </div>
-
-          {/* Integration Info */}
-          <div className="p-4 bg-grey-50 border border-border space-y-2">
-            <h3 className="text-sm font-semibold">Configured Integrations</h3>
-            <div className="flex flex-wrap gap-2">
+            <div className="space-y-3">
               {agent.integrations.map((integration) => (
-                <span
+                <PipedreamConnect
                   key={integration}
-                  className="px-2 py-1 bg-background border border-border text-xs"
-                >
-                  {integration}
-                </span>
+                  appName={integration}
+                />
               ))}
             </div>
-            <p className="text-xs text-grey-500 mt-2">
-              Use Pipedream to connect these tools and create a webhook URL above.
-            </p>
           </div>
 
           {/* How It Works */}
           <div className="p-4 bg-background border border-border space-y-2">
             <h3 className="text-sm font-semibold">How This Works</h3>
             <div className="text-xs text-grey-600 space-y-1">
-              <p><strong>AI Only:</strong> Set AI prompt only - agent processes previous data with AI</p>
-              <p><strong>Webhook Only:</strong> Set webhook only - agent fetches/triggers external tools</p>
-              <p><strong>AI + Webhook:</strong> Set both - agent fetches data, then processes it with AI</p>
+              <p><strong>AI Only:</strong> Set AI prompt - agent processes data with Gemini</p>
+              <p><strong>With Integrations:</strong> Connect apps above - agent fetches real data via Pipedream, then processes with AI</p>
+              <p><strong>Web Search:</strong> Use "Search the web..." in prompts for real-time data</p>
             </div>
           </div>
         </div>
