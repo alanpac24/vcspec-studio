@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -215,7 +216,13 @@ serve(async (req) => {
       );
     }
 
+    // Get API keys
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const PIPEDREAM_PROJECT_ID = Deno.env.get('PIPEDREAM_PROJECT_ID');
+    const PIPEDREAM_CLIENT_ID = Deno.env.get('PIPEDREAM_CLIENT_ID');
+    const PIPEDREAM_CLIENT_SECRET = Deno.env.get('PIPEDREAM_CLIENT_SECRET');
+    const PIPEDREAM_ENVIRONMENT = Deno.env.get('PIPEDREAM_ENVIRONMENT') || 'development';
+
     if (!LOVABLE_API_KEY) {
       console.error('LOVABLE_API_KEY not found');
       return new Response(
@@ -229,7 +236,66 @@ serve(async (req) => {
 
     console.log('Generating bespoke workflow for command:', command);
 
-    // Always generate a bespoke workflow using AI
+    // Discover apps from command using Pipedream if credentials available
+    let discoveredApps: string[] = [];
+    if (PIPEDREAM_PROJECT_ID && PIPEDREAM_CLIENT_ID && PIPEDREAM_CLIENT_SECRET) {
+      try {
+        console.log('Discovering apps from command using Pipedream...');
+        
+        // Get Pipedream access token
+        const tokenResponse = await fetch('https://api.pipedream.com/v1/oauth/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            grant_type: 'client_credentials',
+            client_id: PIPEDREAM_CLIENT_ID,
+            client_secret: PIPEDREAM_CLIENT_SECRET,
+          }),
+        });
+
+        if (tokenResponse.ok) {
+          const { access_token } = await tokenResponse.json();
+
+          // Extract potential app names from command
+          const potentialApps = command.toLowerCase().match(/\b(gmail|slack|notion|sheets|crm|hubspot|salesforce|airtable|trello|asana|jira|discord|teams|calendar|drive|dropbox|github|twitter|linkedin|facebook|instagram|mailchimp|stripe|paypal|shopify|wordpress|zendesk|intercom|crunchbase|pipedrive|typeform)\b/g) || [];
+          
+          if (potentialApps.length > 0) {
+            // Search for each potential app
+            const appPromises = potentialApps.map(async (appName: string) => {
+              try {
+                const appsResponse = await fetch(`https://api.pipedream.com/v1/apps?q=${encodeURIComponent(appName)}&sort_key=featured_weight&sort_direction=desc&limit=1`, {
+                  headers: {
+                    'Authorization': `Bearer ${access_token}`,
+                    'Content-Type': 'application/json',
+                  },
+                });
+                
+                if (appsResponse.ok) {
+                  const appsData = await appsResponse.json();
+                  return appsData.data?.[0]?.name_slug || null;
+                }
+              } catch (e) {
+                console.error(`Error fetching app ${appName}:`, e);
+              }
+              return null;
+            });
+
+            const apps = await Promise.all(appPromises);
+            discoveredApps = apps.filter(app => app !== null) as string[];
+            console.log('Discovered apps:', discoveredApps);
+          }
+        }
+      } catch (error) {
+        console.error('Error discovering apps from Pipedream:', error);
+        // Continue without app discovery
+      }
+    }
+
+    // Call Lovable AI to generate workflow with discovered apps context
+    const appsContext = discoveredApps.length > 0 
+      ? `\n\nDetected integrations from command: ${discoveredApps.join(', ')}. Use these apps where appropriate in the workflow.`
+      : '';
+
     const customWorkflowResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -241,16 +307,24 @@ serve(async (req) => {
           messages: [
             {
               role: 'system',
-              content: `You are a workflow automation expert. Given a user's request, design a multi-step workflow with 2-4 agents.
+              content: `You are a workflow automation expert. Given a user's request, design a multi-step workflow with 2-4 agents.${appsContext}
 
 For each agent, provide:
 - name: Clear, action-oriented name (e.g., "News Fetcher Agent")
 - description: What this agent does
 - inputs: What data it receives
 - outputs: What data it produces
-- integrations: Array of tools needed (e.g., ["Gmail", "Slack", "RSS Feeds", "Pipedrive"])
-- ai_prompt: Detailed instructions for AI on what to do with the data
+- integrations: Array of tools needed (e.g., ["gmail", "slack", "notion"])
+- ai_prompt: Detailed instructions for AI. Include "Search the web for..." when real-time data is needed.
 - step_order: 1, 2, 3, etc.
+
+When integrations are detected, agents should:
+1. Use Pipedream to fetch data from external services
+2. Let AI process, analyze, or transform that data
+3. Send results back through Pipedream integrations
+
+AI prompts should leverage Gemini's web search capabilities for real-time data.
+Example: "Search the web for latest news about [company] and summarize the top 3 most relevant articles."
 
 Return ONLY valid JSON:
 {
@@ -320,12 +394,26 @@ Return ONLY valid JSON:
             description: 'Processes input data according to your requirements',
             inputs: 'Trigger data',
             outputs: 'Processed results',
-            integrations: ['Pipedream'],
-            ai_prompt: `Based on this request: "${command}", analyze and process the input data appropriately. Return structured JSON output.`,
+            integrations: discoveredApps.length > 0 ? discoveredApps : [],
+            ai_prompt: `Based on this request: "${command}", analyze and process the input data appropriately. Search the web if you need current information. Return structured JSON output.`,
             step_order: 1,
           }
         ]
       };
+    }
+
+    // Enhance workflow with discovered apps if not already included
+    if (discoveredApps.length > 0 && customWorkflow.agents) {
+      customWorkflow.agents = customWorkflow.agents.map((agent: any) => {
+        // Add discovered apps to agent integrations if they don't have any
+        if (!agent.integrations || agent.integrations.length === 0) {
+          return {
+            ...agent,
+            integrations: discoveredApps
+          };
+        }
+        return agent;
+      });
     }
 
     return new Response(
@@ -334,6 +422,7 @@ Return ONLY valid JSON:
         name: customWorkflow.name || 'Custom Workflow',
         description: customWorkflow.description || command,
         agents: customWorkflow.agents || [],
+        discovered_apps: discoveredApps,
         confidence: 0.8
       }),
       {

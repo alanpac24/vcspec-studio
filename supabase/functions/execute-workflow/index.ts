@@ -1,6 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+interface PipedreamConnectConfig {
+  project_id: string;
+  client_id: string;
+  client_secret: string;
+  environment: string;
+  access_token?: string;
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -48,6 +56,42 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get Pipedream credentials
+    const pipedreamConfig: PipedreamConnectConfig | undefined = 
+      Deno.env.get('PIPEDREAM_PROJECT_ID') && 
+      Deno.env.get('PIPEDREAM_CLIENT_ID') && 
+      Deno.env.get('PIPEDREAM_CLIENT_SECRET') 
+      ? {
+          project_id: Deno.env.get('PIPEDREAM_PROJECT_ID')!,
+          client_id: Deno.env.get('PIPEDREAM_CLIENT_ID')!,
+          client_secret: Deno.env.get('PIPEDREAM_CLIENT_SECRET')!,
+          environment: Deno.env.get('PIPEDREAM_ENVIRONMENT') || 'development',
+        }
+      : undefined;
+
+    // Get Pipedream access token if config available
+    if (pipedreamConfig) {
+      try {
+        const tokenResponse = await fetch('https://api.pipedream.com/v1/oauth/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            grant_type: 'client_credentials',
+            client_id: pipedreamConfig.client_id,
+            client_secret: pipedreamConfig.client_secret,
+          }),
+        });
+
+        if (tokenResponse.ok) {
+          const { access_token } = await tokenResponse.json();
+          pipedreamConfig.access_token = access_token;
+          console.log('Pipedream Connect authenticated successfully');
+        }
+      } catch (error) {
+        console.error('Failed to authenticate with Pipedream:', error);
+      }
+    }
 
     console.log('Starting workflow execution:', workflow_id);
 
@@ -97,7 +141,7 @@ serve(async (req) => {
       console.log(`Executing agent: ${agent.name} (Step ${agent.step_order})`);
 
       try {
-        const result = await executeAgent(agent, pipelineData);
+        const result = await executeAgent(agent, pipelineData, pipedreamConfig);
         const executionTime = Date.now() - startTime;
 
         agentResults.push({
@@ -180,14 +224,43 @@ serve(async (req) => {
   }
 });
 
-async function executeAgent(agent: AgentConfig, inputData: any): Promise<any> {
+async function executeAgent(
+  agent: AgentConfig, 
+  inputData: any, 
+  pipedreamConfig?: PipedreamConnectConfig
+): Promise<any> {
   console.log(`Executing agent: ${agent.name}`);
   console.log('Input data:', inputData);
 
   const pipedreamWebhook = agent.integration_config?.pipedream_webhook;
   const aiPrompt = agent.ai_prompt;
+  const hasIntegrations = agent.integrations && agent.integrations.length > 0;
   
-  // Case 1: AI + Pipedream - Fetch data then process with AI
+  // Case 1: Pipedream Connect - use real API calls via Connect (future implementation)
+  if (hasIntegrations && pipedreamConfig?.access_token && !pipedreamWebhook) {
+    console.log(`Agent ${agent.name}: Pipedream Connect mode (integrations:`, agent.integrations, ')');
+    // In production, this would use Pipedream MCP tools or Connect proxy
+    // For now, prepare integration data for AI processing
+    const integrationContext = {
+      integrations_available: agent.integrations,
+      note: 'Pipedream Connect enabled - ready for real API calls',
+      timestamp: new Date().toISOString(),
+    };
+
+    if (aiPrompt) {
+      console.log('Processing with AI using integration context');
+      const aiResult = await callLovableAI(agent, { ...inputData, integration_context: integrationContext });
+      return {
+        mode: 'pipedream_connect',
+        integration_context: integrationContext,
+        ai_output: aiResult,
+      };
+    }
+
+    return integrationContext;
+  }
+  
+  // Case 2: AI + Pipedream webhook - Fetch data then process with AI
   if (aiPrompt && pipedreamWebhook) {
     console.log('Executing AI agent with Pipedream data fetch');
     
