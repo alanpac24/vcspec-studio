@@ -1,6 +1,5 @@
 import { useState, KeyboardEvent } from "react";
 import { WorkflowCard } from "./WorkflowCard";
-import { RunsTable } from "./RunsTable";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,33 +42,6 @@ const workflows = [
     description: "Manage LP relationships and fundraising activities",
     path: "/fundraising",
     emoji: "💼",
-  },
-];
-
-const recentRuns = [
-  {
-    time: "10:23 AM",
-    workflow: "Dealflow Triage",
-    agents: 4,
-    status: "Success",
-  },
-  {
-    time: "9:45 AM",
-    workflow: "Meeting Prep",
-    agents: 3,
-    status: "Success",
-  },
-  {
-    time: "9:12 AM",
-    workflow: "CRM Hygiene",
-    agents: 3,
-    status: "Needs Approval",
-  },
-  {
-    time: "Yesterday 11:30 PM",
-    workflow: "Portfolio & LP Ops",
-    agents: 5,
-    status: "Success",
   },
 ];
 
@@ -164,14 +136,6 @@ export const Dashboard = () => {
               <WorkflowCard key={workflow.path} {...workflow} />
             ))}
           </div>
-        </section>
-
-        {/* Recent Runs Section */}
-        <section>
-          <h2 className="text-base font-semibold mb-4 text-foreground">
-            Recent Runs
-          </h2>
-          <RunsTable runs={recentRuns} />
         </section>
       </div>
 
