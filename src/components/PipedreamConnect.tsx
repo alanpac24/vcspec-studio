@@ -57,32 +57,96 @@ export const PipedreamConnect = ({ appName, onConnected }: PipedreamConnectProps
     setIsConnecting(true);
 
     try {
-      // In production, this would open Pipedream Connect Link
-      // For now, we'll simulate the connection
-      const simulatedAccountId = `${appName}_${Date.now()}`;
+      // Check if Pipedream is configured
+      const hasPipedreamConfig = document.querySelector('meta[name="pipedream-enabled"]')?.getAttribute('content') === 'true';
       
-      const { error } = await supabase
-        .from('connected_accounts')
-        .insert({
-          user_id: user.id,
-          app_name: appName,
-          account_id: simulatedAccountId,
-          account_name: `${appName} Account`,
-          metadata: {
-            connected_via: 'simulation',
-            timestamp: new Date().toISOString(),
-          }
+      if (!hasPipedreamConfig) {
+        // Fallback to simulation mode if Pipedream not configured
+        console.warn('Pipedream not configured, using simulation mode');
+        const simulatedAccountId = `${appName}_${Date.now()}`;
+        
+        const { error } = await supabase
+          .from('connected_accounts')
+          .insert({
+            user_id: user.id,
+            app_name: appName,
+            account_id: simulatedAccountId,
+            account_name: `${appName} Account (Simulated)`,
+            metadata: {
+              connected_via: 'simulation',
+              timestamp: new Date().toISOString(),
+            }
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "Connected (Simulation)",
+          description: `${appName} has been connected in simulation mode.`,
         });
 
-      if (error) throw error;
+        await checkConnection();
+        onConnected?.(simulatedAccountId);
+        return;
+      }
 
-      toast({
-        title: "Connected!",
-        description: `${appName} has been connected successfully.`,
-      });
+      // Real Pipedream Connect Link OAuth flow
+      const state = btoa(JSON.stringify({ 
+        user_id: user.id, 
+        app_name: appName,
+        timestamp: Date.now() 
+      }));
 
-      await checkConnection();
-      onConnected?.(simulatedAccountId);
+      const redirectUri = `${window.location.origin}/oauth/callback`;
+      const connectUrl = `https://api.pipedream.com/connect/oauth/authorize?app=${appName.toLowerCase()}&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+      // Open OAuth popup
+      const popup = window.open(connectUrl, 'PipedreamConnect', 'width=600,height=700');
+
+      // Listen for OAuth callback
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'pipedream_oauth_success') {
+          const { account_id, account_name, metadata } = event.data;
+          
+          const { error } = await supabase
+            .from('connected_accounts')
+            .insert({
+              user_id: user.id,
+              app_name: appName,
+              account_id,
+              account_name,
+              metadata: {
+                ...metadata,
+                connected_via: 'pipedream_oauth',
+                timestamp: new Date().toISOString()
+              }
+            });
+
+          if (error) throw error;
+
+          toast({
+            title: "Connected!",
+            description: `${appName} has been connected successfully.`,
+          });
+
+          await checkConnection();
+          onConnected?.(account_id);
+          popup?.close();
+          window.removeEventListener('message', handleMessage);
+        } else if (event.data.type === 'pipedream_oauth_error') {
+          throw new Error(event.data.error);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+      
+      // Cleanup after 5 minutes
+      setTimeout(() => {
+        window.removeEventListener('message', handleMessage);
+      }, 5 * 60 * 1000);
+
     } catch (error: any) {
       console.error('Error connecting:', error);
       toast({

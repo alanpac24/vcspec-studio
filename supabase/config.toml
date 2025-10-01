@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.setup-workflow-schedule]
 verify_jwt = false
+
+[functions.pipedream-oauth-exchange]
+verify_jwt = true

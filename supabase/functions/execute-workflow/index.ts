@@ -394,25 +394,73 @@ async function callLovableAI(agent: AgentConfig, inputData: any): Promise<any> {
 
   console.log('Calling Lovable AI with prompt:', agent.ai_prompt);
 
+  // Detect if agent needs web search or content extraction
+  const needsWebSearch = agent.ai_prompt?.toLowerCase().includes("search the web") || 
+                        agent.ai_prompt?.toLowerCase().includes("find articles") ||
+                        agent.ai_prompt?.toLowerCase().includes("latest news");
+  
+  const needsContentExtraction = agent.ai_prompt?.toLowerCase().includes("visit the webpage") ||
+                                 agent.ai_prompt?.toLowerCase().includes("extract content") ||
+                                 agent.ai_prompt?.toLowerCase().includes("scrape");
+
+  let systemPrompt = `You are ${agent.name}. ${agent.description}\n\nYour task: ${agent.ai_prompt}\n\nReturn structured JSON output that the next agent can use.`;
+  
+  if (needsWebSearch) {
+    systemPrompt += "\n\nYou have access to real-time web search. Use it to find current, accurate information from reputable sources. Return URLs and summaries.";
+  }
+  
+  if (needsContentExtraction) {
+    systemPrompt += "\n\nWhen given URLs, extract and summarize the main content from those web pages.";
+  }
+
+  // Clean input data for better processing
+  let cleanData = inputData;
+  if (inputData?.ai_output?.ai_response) {
+    if (typeof inputData.ai_output.ai_response === 'string') {
+      try {
+        cleanData = JSON.parse(inputData.ai_output.ai_response.replace(/```json\n?|\n?```/g, '').trim());
+      } catch {
+        cleanData = inputData.ai_output.ai_response;
+      }
+    } else {
+      cleanData = inputData.ai_output.ai_response;
+    }
+  }
+
+  const requestBody: any = {
+    model: 'google/gemini-2.5-flash',
+    messages: [
+      {
+        role: 'system',
+        content: systemPrompt
+      },
+      {
+        role: 'user',
+        content: `Process this data:\n\n${JSON.stringify(cleanData, null, 2)}`
+      }
+    ],
+  };
+
+  // Enable web search for Gemini when needed
+  if (needsWebSearch) {
+    requestBody.tools = [{
+      type: 'google_search_retrieval',
+      google_search_retrieval: {
+        dynamic_retrieval_config: {
+          mode: 'MODE_DYNAMIC',
+          dynamic_threshold: 0.7
+        }
+      }
+    }];
+  }
+
   const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${lovableApiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
-      messages: [
-        {
-          role: 'system',
-          content: `You are ${agent.name}. ${agent.description}\n\nYour task: ${agent.ai_prompt}\n\nReturn structured JSON output that the next agent can use.`
-        },
-        {
-          role: 'user',
-          content: `Process this data:\n\n${JSON.stringify(inputData, null, 2)}`
-        }
-      ],
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
@@ -437,7 +485,8 @@ async function callLovableAI(agent: AgentConfig, inputData: any): Promise<any> {
 
   // Try to parse as JSON, fall back to raw text
   try {
-    return JSON.parse(aiOutput);
+    const parsed = JSON.parse(aiOutput.replace(/```json\n?|\n?```/g, '').trim());
+    return parsed;
   } catch {
     return { ai_response: aiOutput };
   }
