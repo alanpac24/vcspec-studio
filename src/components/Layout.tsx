@@ -1,4 +1,4 @@
-import { ReactNode, useState, KeyboardEvent } from "react";
+import { ReactNode, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { 
   Menu, 
@@ -13,14 +13,10 @@ import {
   Play, 
   FileText, 
   Settings,
-  Loader2,
   LogOut,
   User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { WorkflowPreview } from "./WorkflowPreview";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
@@ -64,47 +60,7 @@ const navSections = [
 
 export const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [commandInput, setCommandInput] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [workflowPreview, setWorkflowPreview] = useState<any>(null);
-  const { toast } = useToast();
   const { user, signOut } = useAuth();
-
-  const handleCommandSubmit = async () => {
-    if (!commandInput.trim() || isProcessing) return;
-
-    setIsProcessing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('parse-workflow-command', {
-        body: { command: commandInput },
-      });
-
-      if (error) throw error;
-
-      console.log('Parsed workflow:', data);
-      // Map workflow_type to workflowType for the preview component
-      setWorkflowPreview({
-        ...data,
-        workflowType: data.workflow_type
-      });
-      setCommandInput("");
-    } catch (error) {
-      console.error('Error parsing command:', error);
-      toast({
-        title: "Error",
-        description: "Failed to parse command. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleCommandSubmit();
-    }
-  };
 
   return (
     <div className="flex h-screen w-full bg-background">
@@ -168,46 +124,7 @@ export const Layout = ({ children }: LayoutProps) => {
             {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
 
-          <div className="flex-1 max-w-2xl flex gap-2">
-            <input
-              type="text"
-              placeholder="Type to create or search workflows... (e.g., 'automate deal scoring')"
-              value={commandInput}
-              onChange={(e) => setCommandInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={isProcessing}
-              className="flex-1 px-3 py-1.5 text-sm border border-input bg-background text-foreground placeholder:text-grey-400 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
-            />
-            <Button
-              onClick={handleCommandSubmit}
-              disabled={isProcessing || !commandInput.trim()}
-              size="sm"
-              className="h-8 px-4 whitespace-nowrap"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                'Create'
-              )}
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="sm" className="h-7 text-xs text-grey-600 hover:bg-grey-100 hover:text-grey-900">
-              Save
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7 text-xs text-grey-600 hover:bg-grey-100 hover:text-grey-900">
-              Preview
-            </Button>
-            <Button size="sm" className="h-7 bg-primary text-primary-foreground hover:bg-grey-800 text-xs px-3">
-              Run
-            </Button>
-          </div>
-
-          <div className="ml-2 flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -238,14 +155,6 @@ export const Layout = ({ children }: LayoutProps) => {
         {/* Content Area */}
         <main className="flex-1 overflow-auto bg-background">{children}</main>
       </div>
-
-      {/* Workflow Preview Modal */}
-      {workflowPreview && (
-        <WorkflowPreview
-          {...workflowPreview}
-          onClose={() => setWorkflowPreview(null)}
-        />
-      )}
     </div>
   );
 };
