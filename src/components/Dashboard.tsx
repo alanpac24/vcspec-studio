@@ -105,7 +105,7 @@ export const Dashboard = () => {
               onChange={(e) => setCommandInput(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={isProcessing}
-              className="flex-1 px-4 py-3 text-sm border border-input bg-background text-foreground placeholder:text-grey-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent rounded-lg transition-all disabled:opacity-50 shadow-sm"
+              className="flex-1 px-4 py-3 text-sm border border-input bg-background text-foreground placeholder:text-grey-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50 shadow-sm"
             />
             <Button
               onClick={handleCommandSubmit}
