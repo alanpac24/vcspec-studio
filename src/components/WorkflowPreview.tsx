@@ -3,6 +3,8 @@ import { X, Check, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { IntegrationSetupModal } from "./IntegrationSetupModal";
 
 interface Agent {
   name: string;
@@ -33,6 +35,21 @@ export const WorkflowPreview = ({
 }: WorkflowPreviewProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [showIntegrationModal, setShowIntegrationModal] = useState(false);
+
+  // Collect all unique integrations from agents
+  const allIntegrations = Array.from(
+    new Set(agents.flatMap(agent => agent.integrations || []))
+  );
+
+  const handleCreateClick = () => {
+    // Check if workflow has integrations that need setup
+    if (allIntegrations.length > 0) {
+      setShowIntegrationModal(true);
+    } else {
+      handleCreate();
+    }
+  };
 
   const handleCreate = async () => {
     try {
@@ -74,6 +91,7 @@ export const WorkflowPreview = ({
         description: `${name} has been created successfully.`,
       });
 
+      setShowIntegrationModal(false);
       onClose();
       
       // Navigate to the workflow detail page
@@ -89,8 +107,9 @@ export const WorkflowPreview = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-background border border-border max-w-4xl w-full max-h-[90vh] overflow-auto">
+    <>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-background border border-border max-w-4xl w-full max-h-[90vh] overflow-auto">
         {/* Header */}
         <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
           <div>
@@ -196,14 +215,30 @@ export const WorkflowPreview = ({
             Cancel
           </Button>
           <Button
-            onClick={handleCreate}
+            onClick={handleCreateClick}
             className="bg-primary text-primary-foreground hover:bg-grey-800 h-9 text-sm"
           >
             <Check className="h-4 w-4 mr-2" />
-            Create Workflow
+            {allIntegrations.length > 0 ? 'Setup Integrations' : 'Create Workflow'}
           </Button>
         </div>
       </div>
     </div>
+
+    {/* Integration Setup Modal */}
+    {showIntegrationModal && (
+      <IntegrationSetupModal
+        integrations={allIntegrations.map(name => ({ 
+          name, 
+          status: 'needed' as const 
+        }))}
+        workflowName={name}
+        onClose={() => {
+          setShowIntegrationModal(false);
+        }}
+        onContinue={handleCreate}
+      />
+    )}
+  </>
   );
 };
