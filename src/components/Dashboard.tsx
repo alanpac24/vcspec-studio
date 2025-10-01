@@ -1,6 +1,5 @@
 import { WorkflowCard } from "./WorkflowCard";
 import { RunsTable } from "./RunsTable";
-import { ApprovalsQueue } from "./ApprovalsQueue";
 
 const workflows = [
   {
@@ -68,17 +67,6 @@ const recentRuns = [
   },
 ];
 
-const approvals = [
-  {
-    item: "CRM Stage Change",
-    context: "Move 'Acme AI' from Qualification to Due Diligence",
-  },
-  {
-    item: "Outbound Email",
-    context: "Send personalized outreach to 3 AI infrastructure companies",
-  },
-];
-
 export const Dashboard = () => {
   return (
     <div className="max-w-7xl mx-auto">
@@ -107,35 +95,6 @@ export const Dashboard = () => {
             Recent Runs
           </h2>
           <RunsTable runs={recentRuns} />
-        </section>
-
-        {/* Approvals Queue Section */}
-        <section>
-          <h2 className="text-base font-semibold mb-4 text-foreground">
-            Approvals Queue
-          </h2>
-          <ApprovalsQueue approvals={approvals} />
-        </section>
-
-        {/* System Health Section */}
-        <section>
-          <h2 className="text-base font-semibold mb-4 text-foreground">
-            System Health
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="border border-border bg-card hover:bg-grey-50 transition-colors p-5">
-              <div className="text-2xl font-bold text-foreground">127</div>
-              <div className="text-sm text-grey-500 mt-1">Agent runs today</div>
-            </div>
-            <div className="border border-border bg-card hover:bg-grey-50 transition-colors p-5">
-              <div className="text-2xl font-bold text-foreground">3</div>
-              <div className="text-sm text-grey-500 mt-1">Failures</div>
-            </div>
-            <div className="border border-border bg-card hover:bg-grey-50 transition-colors p-5">
-              <div className="text-2xl font-bold text-foreground">1.2s</div>
-              <div className="text-sm text-grey-500 mt-1">Avg latency</div>
-            </div>
-          </div>
         </section>
       </div>
     </div>
