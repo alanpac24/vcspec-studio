@@ -35,13 +35,25 @@ const navSections = [
     title: "Workflows",
     items: [
       { label: "Dashboard", path: "/", icon: LayoutDashboard },
+      { label: "Dealflow Triage", path: "/dealflow-triage", icon: Filter },
+      { label: "Meeting Preparation", path: "/meeting-prep", icon: Calendar },
+      { label: "CRM Hygiene", path: "/crm-hygiene", icon: Database },
+      { label: "Research & Outbound", path: "/research-outbound", icon: Search },
+      { label: "Portfolio & LP Ops", path: "/portfolio-lp", icon: Briefcase },
     ],
   },
   {
     title: "Management",
     items: [
-      { label: "Runs", path: "/runs", icon: Play },
       { label: "Agents Library", path: "/agents", icon: Box },
+      { label: "Runs", path: "/runs", icon: Play },
+      { label: "Audit Logs", path: "/audit", icon: FileText },
+    ],
+  },
+  {
+    title: "Configuration",
+    items: [
+      { label: "Settings", path: "/settings", icon: Settings },
     ],
   },
 ];
@@ -107,8 +119,7 @@ export const Layout = ({ children }: LayoutProps) => {
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="h-7 w-7 text-muted-foreground hover:bg-accent"
-            aria-label="Toggle sidebar"
+            className="h-7 w-7 text-grey-600 hover:bg-grey-100"
           >
             {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
