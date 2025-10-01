@@ -71,7 +71,11 @@ export const Layout = ({ children }: LayoutProps) => {
       if (error) throw error;
 
       console.log('Parsed workflow:', data);
-      setWorkflowPreview(data);
+      // Map workflow_type to workflowType for the preview component
+      setWorkflowPreview({
+        ...data,
+        workflowType: data.workflow_type
+      });
       setCommandInput("");
     } catch (error) {
       console.error('Error parsing command:', error);

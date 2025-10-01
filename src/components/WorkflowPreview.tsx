@@ -7,10 +7,11 @@ import { useNavigate } from "react-router-dom";
 interface Agent {
   name: string;
   description: string;
-  inputs: string;
-  outputs: string;
+  inputs: string | string[];
+  outputs: string | string[];
   integrations: string[];
   step_order: number;
+  ai_prompt?: string;
 }
 
 interface WorkflowPreviewProps {
@@ -54,10 +55,12 @@ export const WorkflowPreview = ({
         workflow_id: workflow.id,
         name: agent.name,
         description: agent.description,
-        inputs: agent.inputs,
-        outputs: agent.outputs,
+        inputs: typeof agent.inputs === 'string' ? agent.inputs : JSON.stringify(agent.inputs),
+        outputs: typeof agent.outputs === 'string' ? agent.outputs : JSON.stringify(agent.outputs),
         integrations: agent.integrations,
         step_order: agent.step_order,
+        ai_prompt: agent.ai_prompt || null,
+        parameters: {}
       }));
 
       const { error: agentsError } = await supabase
@@ -73,19 +76,8 @@ export const WorkflowPreview = ({
 
       onClose();
       
-      // Navigate to the workflow page
-      const routeMap: Record<string, string> = {
-        'dealflow-triage': '/dealflow-triage',
-        'meeting-prep': '/meeting-prep',
-        'crm-hygiene': '/crm-hygiene',
-        'research-outbound': '/research-outbound',
-        'portfolio-lp': '/portfolio-lp',
-      };
-      
-      const route = routeMap[workflowType];
-      if (route) {
-        navigate(route);
-      }
+      // Navigate to the workflow detail page
+      navigate(`/workflow/${workflow.id}`);
     } catch (error) {
       console.error('Error creating workflow:', error);
       toast({
@@ -131,9 +123,9 @@ export const WorkflowPreview = ({
                   <div className="text-xs font-semibold text-grey-500 uppercase tracking-wide mb-2">
                     Trigger
                   </div>
-                  <div className="font-medium text-sm text-foreground">Inbound Event</div>
+                  <div className="font-medium text-sm text-foreground">Manual / Scheduled</div>
                   <div className="text-xs text-grey-500 mt-2">
-                    Email, form, or intro
+                    Run manually or on schedule
                   </div>
                 </div>
               </div>
@@ -183,9 +175,13 @@ export const WorkflowPreview = ({
                     <div className="text-xs font-semibold text-grey-500 uppercase tracking-wide mb-2">
                       Output
                     </div>
-                    <div className="font-medium text-sm text-foreground">Slack / CRM</div>
+                    <div className="font-medium text-sm text-foreground">
+                      {agents[agents.length - 1]?.integrations?.length > 0 
+                        ? agents[agents.length - 1].integrations.join(' / ')
+                        : 'Results'}
+                    </div>
                     <div className="text-xs text-grey-500 mt-2">
-                      Notifications & updates
+                      Final workflow output
                     </div>
                   </div>
                 </div>
