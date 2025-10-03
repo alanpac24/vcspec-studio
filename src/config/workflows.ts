@@ -71,7 +71,7 @@ export const workflowCategories = [
       },
       {
         type: "offer-packaging",
-        title: "Offer Design & Packaging",
+        title: "Pricing Structure",
         description: "Create pricing tiers and packages",
         emoji: "📦",
         path: "/offer-packaging"
