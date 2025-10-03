@@ -8,40 +8,58 @@ import { WorkflowPreview } from "./WorkflowPreview";
 
 const workflows = [
   {
-    title: "Dealflow Triage",
-    description: "Capture, enrich, score, and route inbound deals automatically",
-    path: "/dealflow-triage",
-    emoji: "🎯",
+    title: "Idea Refiner & Business Canvas",
+    description: "Clarify your idea, define your ICP, and auto-generate a Lean Canvas",
+    path: "/idea-refiner",
+    emoji: "💡",
   },
   {
-    title: "Meeting Preparation",
-    description: "Generate meeting briefs with CRM history and external research",
-    path: "/meeting-prep",
-    emoji: "📅",
-  },
-  {
-    title: "CRM Hygiene",
-    description: "Dedupe, fill missing fields, and maintain data quality",
-    path: "/crm-hygiene",
-    emoji: "🧹",
-  },
-  {
-    title: "Research & Outbound",
-    description: "Research companies by thesis, rank fit, draft outreach",
-    path: "/research-outbound",
+    title: "Market Research & Insights",
+    description: "Size your market, analyze competitors, and plan customer research",
+    path: "/market-research",
     emoji: "🔍",
   },
   {
-    title: "Portfolio & LP Ops",
-    description: "Collect updates, draft LP letters, flag risks",
-    path: "/portfolio-lp",
+    title: "Offer Design & Packaging",
+    description: "Define your MVP features and create compelling product tiers",
+    path: "/offer-design",
+    emoji: "📦",
+  },
+  {
+    title: "Pricing Strategy Advisor",
+    description: "Choose your pricing model and calculate optimal price points",
+    path: "/pricing-strategy",
+    emoji: "💰",
+  },
+  {
+    title: "Distribution & GTM Planner",
+    description: "Select channels, design your funnel, and build a 90-day launch plan",
+    path: "/gtm-planner",
+    emoji: "🚀",
+  },
+  {
+    title: "Messaging & Copy Generator",
+    description: "Create on-brand copy for landing pages, emails, and social media",
+    path: "/messaging-copy",
+    emoji: "✍️",
+  },
+  {
+    title: "Simple Financials & Milestones",
+    description: "Project revenue, plan expenses, and set key business milestones",
+    path: "/financials",
     emoji: "📊",
   },
   {
-    title: "Fundraising / LP CRM",
-    description: "Manage LP relationships and fundraising activities",
-    path: "/fundraising",
-    emoji: "💼",
+    title: "Risk, Compliance & Ops",
+    description: "Legal templates, brand protection, and operational readiness",
+    path: "/risk-compliance",
+    emoji: "⚖️",
+  },
+  {
+    title: "Investor/Partner One-Pager",
+    description: "Generate pitch materials and elevator pitches from your business data",
+    path: "/investor-one-pager",
+    emoji: "📄",
   },
 ];
 
@@ -91,8 +109,8 @@ export const Dashboard = () => {
       {/* Page Header with Centered Search */}
       <div className="px-12 pt-12 pb-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
-          <p className="text-sm text-grey-500">Create workflows with natural language</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Vibe Business Toolbox</h1>
+          <p className="text-sm text-grey-500">Launch your tech business with AI-powered workflows</p>
         </div>
         
         {/* Centered Command Bar */}
@@ -100,7 +118,7 @@ export const Dashboard = () => {
           <div className="flex gap-3">
             <input
               type="text"
-              placeholder="Type to create workflows... (e.g., 'automate deal scoring', 'build AI news digest')"
+              placeholder="Describe what you need... (e.g., 'help me validate my SaaS idea', 'create a pricing strategy')"
               value={commandInput}
               onChange={(e) => setCommandInput(e.target.value)}
               onKeyPress={handleKeyPress}

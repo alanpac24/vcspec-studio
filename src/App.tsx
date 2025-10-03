@@ -5,12 +5,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
-import DealflowTriage from "./pages/DealflowTriage";
-import MeetingPrep from "./pages/MeetingPrep";
-import CRMHygiene from "./pages/CRMHygiene";
-import ResearchOutbound from "./pages/ResearchOutbound";
-import PortfolioLP from "./pages/PortfolioLP";
-import Fundraising from "./pages/Fundraising";
+import IdeaRefiner from "./pages/IdeaRefiner";
+import MarketResearch from "./pages/MarketResearch";
+import OfferDesign from "./pages/OfferDesign";
+import PricingStrategy from "./pages/PricingStrategy";
+import GTMPlanner from "./pages/GTMPlanner";
+import MessagingCopy from "./pages/MessagingCopy";
+import Financials from "./pages/Financials";
+import RiskCompliance from "./pages/RiskCompliance";
+import InvestorOnePager from "./pages/InvestorOnePager";
 import RunsPage from "./pages/RunsPage";
 import AgentsLibrary from "./pages/AgentsLibrary";
 import WorkflowDetail from "./pages/WorkflowDetail";
@@ -31,12 +34,15 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/oauth/callback" element={<OAuthCallback />} />
             <Route path="/" element={<Index />} />
-            <Route path="/dealflow-triage" element={<DealflowTriage />} />
-            <Route path="/meeting-prep" element={<MeetingPrep />} />
-            <Route path="/crm-hygiene" element={<CRMHygiene />} />
-            <Route path="/research-outbound" element={<ResearchOutbound />} />
-            <Route path="/portfolio-lp" element={<PortfolioLP />} />
-            <Route path="/fundraising" element={<Fundraising />} />
+            <Route path="/idea-refiner" element={<IdeaRefiner />} />
+            <Route path="/market-research" element={<MarketResearch />} />
+            <Route path="/offer-design" element={<OfferDesign />} />
+            <Route path="/pricing-strategy" element={<PricingStrategy />} />
+            <Route path="/gtm-planner" element={<GTMPlanner />} />
+            <Route path="/messaging-copy" element={<MessagingCopy />} />
+            <Route path="/financials" element={<Financials />} />
+            <Route path="/risk-compliance" element={<RiskCompliance />} />
+            <Route path="/investor-one-pager" element={<InvestorOnePager />} />
             <Route path="/runs" element={<RunsPage />} />
             <Route path="/agents" element={<AgentsLibrary />} />
             <Route path="/workflow/:id" element={<WorkflowDetail />} />
