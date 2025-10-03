@@ -12,40 +12,318 @@ const WORKFLOW_TEMPLATES = {
     description: 'Clarify your idea, define your ICP, and auto-generate a Lean Canvas',
     agents: [
       {
-        name: 'Idea Diagnostic Agent',
-        description: 'Analyzes business idea and asks clarifying questions',
+        name: 'Diagnostic Q&A Agent',
+        description: 'Analyzes business idea with clarifying questions about problem, audience, and timing',
         inputs: 'User business idea description',
-        outputs: 'Problem statement, target audience, unique insight, key assumptions',
+        outputs: 'Problem statement, target audience hypothesis, unique insights, key assumptions, clarifying questions',
         integrations: [],
         step_order: 1,
-        ai_prompt: 'Analyze this business idea: {{user_input}}. Ask clarifying questions about: problem being solved, target audience, why now, existing alternatives. Search the web for similar solutions and market context. Return JSON with: problem_statement (string), target_audience_hypothesis (string), unique_insight (string), key_assumptions (array of strings), clarifying_questions (array of strings), existing_alternatives (array with name and description).'
+        ai_prompt: `You are a business diagnostic expert helping a founder clarify their business idea.
+
+Analyze the business idea provided and conduct a thorough diagnostic by:
+1. Identifying the core problem being solved
+2. Understanding the target audience
+3. Evaluating why now is the right time
+4. Researching existing alternatives in the market
+5. Uncovering unique insights
+
+**Search the web** for:
+- Similar solutions and products in this space
+- Market validation and demand signals
+- Recent trends that make this timely
+- Customer pain points in this domain
+
+Return a comprehensive JSON response with:
+{
+  "problem_statement": "Clear 2-3 sentence description of the problem",
+  "target_audience_hypothesis": "Who experiences this problem most acutely",
+  "unique_insight": "What non-obvious insight makes this idea compelling",
+  "key_assumptions": ["Critical assumption 1", "Critical assumption 2", "Critical assumption 3"],
+  "clarifying_questions": ["Question 1 to validate assumption", "Question 2 to understand market", "Question 3 about competition"],
+  "existing_alternatives": [
+    {"name": "Alternative 1", "description": "How people solve this today", "limitations": "Why it's insufficient"},
+    {"name": "Alternative 2", "description": "Another way", "limitations": "Its shortcomings"}
+  ],
+  "market_signals": ["Signal 1 showing demand", "Signal 2 indicating timing"]
+}
+
+Business Idea: {{user_input}}`
       },
       {
-        name: 'ICP Builder Agent',
-        description: 'Creates detailed Ideal Customer Profiles',
-        inputs: 'Idea diagnostic results',
-        outputs: '2-3 ICP profiles with demographics, psychographics, JTBD',
+        name: 'Customer Segments & ICP Builder',
+        description: 'Creates 2-3 detailed Ideal Customer Profiles with demographics, psychographics, and jobs-to-be-done',
+        inputs: 'Diagnostic results from previous agent',
+        outputs: 'ICP profiles with segments, demographics, behaviors, pain points, and acquisition channels',
         integrations: [],
         step_order: 2,
-        ai_prompt: 'Based on the idea context from previous step, create 2-3 Ideal Customer Profiles. Search the web for demographic and behavioral data about these customer segments. For each ICP return JSON with: segment_name (string), demographics (object with age_range, location, role, income_level), psychographics (object with values array, behaviors array, motivations array), jobs_to_be_done (array), pain_points (array), price_sensitivity (low/medium/high), channels_they_use (array), estimated_segment_size (string).'
+        ai_prompt: `You are a customer segmentation expert. Based on the business diagnostic from the previous agent, create detailed Ideal Customer Profiles (ICPs).
+
+**Search the web** for:
+- Demographic data about these customer segments
+- Behavioral patterns and preferences
+- Where these customers congregate online
+- Typical buying behaviors and decision criteria
+
+Create 2-3 distinct ICP profiles. For EACH profile, return:
+{
+  "icps": [
+    {
+      "segment_name": "Primary Segment Name",
+      "demographics": {
+        "age_range": "e.g., 25-40",
+        "location": "Geographic focus",
+        "role": "Job title or role",
+        "income_level": "Income bracket",
+        "company_size": "If B2B"
+      },
+      "psychographics": {
+        "values": ["What they care about", "Their priorities"],
+        "behaviors": ["How they work", "Decision patterns"],
+        "motivations": ["What drives them", "Success metrics"],
+        "tech_savviness": "low/medium/high"
+      },
+      "jobs_to_be_done": [
+        "Functional job 1",
+        "Emotional job 2",
+        "Social job 3"
+      ],
+      "pain_points": [
+        "Specific pain 1 (with severity: high/medium/low)",
+        "Specific pain 2",
+        "Specific pain 3"
+      ],
+      "price_sensitivity": "low/medium/high",
+      "channels_they_use": ["Platform 1", "Platform 2", "Community 3"],
+      "estimated_segment_size": "Market size estimate with reasoning",
+      "early_adopter_signals": ["Indicator 1", "Indicator 2"]
+    }
+  ],
+  "primary_icp": "Which segment to target first and why"
+}
+
+Previous Analysis: {{previous_output}}`
       },
       {
-        name: 'Value Proposition Agent',
-        description: 'Crafts compelling value proposition and positioning',
-        inputs: 'Idea diagnostic and ICP profiles',
-        outputs: 'Value proposition with benefits and differentiation',
+        name: 'Problem-Solution Fit Agent',
+        description: 'Drafts problem-solution fit and creates compelling value proposition',
+        inputs: 'Diagnostic and ICP data',
+        outputs: 'Problem-solution fit statement, value proposition, positioning, and differentiation',
         integrations: [],
         step_order: 3,
-        ai_prompt: 'Create a compelling value proposition based on previous agent outputs. Return JSON with: headline (max 10 words, customer-benefit focused), three_core_benefits (array of 3 benefit statements), competitive_differentiation (string explaining advantage vs alternatives), proof_points (array of credibility indicators), positioning_statement (one paragraph for internal use). Make it customer-centric, not feature-focused.'
+        ai_prompt: `You are a product positioning expert. Create a compelling problem-solution fit and value proposition.
+
+Based on the problem identified and the ICPs defined, craft:
+
+1. **Problem-Solution Fit Statement**: Clear articulation of how the solution addresses the problem
+2. **Value Proposition**: Customer-benefit focused messaging
+3. **Positioning**: How this fits in the competitive landscape
+4. **Differentiation**: What makes this uniquely valuable
+
+Return JSON:
+{
+  "problem_solution_fit": {
+    "problem_recap": "The problem in customer language",
+    "solution_approach": "How the product solves it",
+    "fit_strength": "high/medium (with reasoning)",
+    "validation_needed": ["What to test", "How to validate"]
+  },
+  "value_proposition": {
+    "headline": "10 words max - compelling customer benefit",
+    "three_core_benefits": [
+      "Benefit 1: specific, measurable outcome",
+      "Benefit 2: emotional or time-saving benefit",
+      "Benefit 3: unique advantage"
+    ],
+    "customer_transformation": "From [current state] to [desired state]"
+  },
+  "positioning_statement": "For [target customer] who [need/problem], this is a [product category] that [key benefit]. Unlike [alternatives], we [unique differentiator].",
+  "competitive_differentiation": {
+    "unique_angle": "What's genuinely different",
+    "proof_points": ["Credibility indicator 1", "Proof 2"],
+    "moat": "What makes this defensible"
+  },
+  "messaging_framework": {
+    "primary_message": "Core message for all communications",
+    "supporting_messages": ["Message pillar 1", "Message pillar 2", "Message pillar 3"]
+  }
+}
+
+Context: {{previous_output}}`
+      },
+      {
+        name: 'Risks & Assumptions Logger',
+        description: 'Identifies and logs critical risks and assumptions that need validation',
+        inputs: 'All previous analysis',
+        outputs: 'Categorized risks, assumptions to validate, and validation methods',
+        integrations: [],
+        step_order: 4,
+        ai_prompt: `You are a risk analysis expert. Identify all critical risks and assumptions that could make or break this business.
+
+Analyze the business idea, target customers, and value proposition to identify:
+1. **Critical Assumptions**: What must be true for this to work
+2. **Market Risks**: Threats from competition, timing, or demand
+3. **Execution Risks**: Challenges in building or delivering
+4. **Financial Risks**: Revenue, cost, or funding concerns
+
+Return comprehensive JSON:
+{
+  "critical_assumptions": [
+    {
+      "assumption": "Clear statement of what we're assuming",
+      "category": "market/customer/product/financial",
+      "risk_level": "high/medium/low",
+      "impact_if_wrong": "What happens if this is false",
+      "validation_method": "How to test this",
+      "estimated_cost_to_validate": "Time and resources needed",
+      "validation_priority": "1-10"
+    }
+  ],
+  "market_risks": [
+    {
+      "risk": "Specific market risk",
+      "likelihood": "high/medium/low",
+      "impact": "high/medium/low",
+      "mitigation": "How to reduce this risk",
+      "early_warning_signs": ["Signal 1", "Signal 2"]
+    }
+  ],
+  "execution_risks": [
+    {
+      "risk": "Execution challenge",
+      "likelihood": "high/medium/low",
+      "impact": "high/medium/low",
+      "mitigation": "How to address",
+      "contingency": "Plan B if this occurs"
+    }
+  ],
+  "financial_risks": [
+    {
+      "risk": "Financial concern",
+      "likelihood": "high/medium/low",
+      "impact": "high/medium/low",
+      "mitigation": "Risk reduction strategy"
+    }
+  ],
+  "validation_roadmap": [
+    {
+      "week": 1,
+      "validation_goals": ["Assumption to test"],
+      "method": "How to test",
+      "success_criteria": "What validates or invalidates"
+    }
+  ],
+  "kill_criteria": ["Dealbreaker 1", "Dealbreaker 2"],
+  "pivot_triggers": ["Signal that suggests pivoting"]
+}
+
+Business Context: {{previous_output}}`
       },
       {
         name: 'Lean Canvas Generator',
-        description: 'Generates complete business model canvas',
+        description: 'Auto-generates complete Lean/Business Model Canvas with all 9 boxes',
         inputs: 'All previous agent outputs',
-        outputs: 'Complete Lean Canvas with all 9 sections',
+        outputs: 'Complete Lean Canvas document with problem, solution, UVP, advantage, segments, metrics, channels, costs, revenue',
         integrations: [],
-        step_order: 4,
-        ai_prompt: 'Generate a complete Lean Canvas based on all previous analysis. Return JSON with all 9 boxes: problem (array of top 3 problems), solution (array of top 3 features), unique_value_proposition (string), unfair_advantage (string or array), customer_segments (array), key_metrics (array of measurable KPIs), channels (array), cost_structure (object with fixed_costs array and variable_costs array), revenue_streams (object with model_type and streams array). Include reasoning field for each major element.'
+        step_order: 5,
+        ai_prompt: `You are a Lean Canvas expert. Generate a complete, actionable Lean Canvas based on all previous analysis.
+
+The Lean Canvas has 9 boxes:
+1. **Problem**: Top 3 customer problems
+2. **Solution**: Top 3 features (not full product)
+3. **Unique Value Proposition**: Single, clear, compelling message
+4. **Unfair Advantage**: Something that can't be easily copied
+5. **Customer Segments**: Target users (prioritized)
+6. **Key Metrics**: Numbers that matter
+7. **Channels**: Path to customers
+8. **Cost Structure**: Fixed and variable costs
+9. **Revenue Streams**: How you make money
+
+Return comprehensive JSON:
+{
+  "lean_canvas": {
+    "problem": {
+      "top_problems": [
+        "Problem 1: Specific pain point",
+        "Problem 2: Another critical issue",
+        "Problem 3: Third important problem"
+      ],
+      "existing_alternatives": ["How it's solved today"],
+      "reasoning": "Why these are the top 3"
+    },
+    "solution": {
+      "top_features": [
+        "Feature 1: MVP capability",
+        "Feature 2: Core functionality",
+        "Feature 3: Key differentiator"
+      ],
+      "reasoning": "Why these features solve the problems"
+    },
+    "unique_value_proposition": {
+      "uvp": "Single sentence that explains why you're different and worth buying",
+      "high_level_concept": "X for Y analogy if applicable"
+    },
+    "unfair_advantage": {
+      "advantage": "What can't be easily copied or bought",
+      "why_defensible": "Explanation of the moat",
+      "time_to_replicate": "How long for competitor to copy"
+    },
+    "customer_segments": {
+      "segments": ["Segment 1", "Segment 2"],
+      "early_adopters": "Specific subset to target first",
+      "beachhead": "Initial market entry point"
+    },
+    "key_metrics": {
+      "metrics": [
+        "Metric 1: Measure of traction",
+        "Metric 2: Health indicator",
+        "Metric 3: Success measure"
+      ],
+      "north_star": "The ONE metric that matters most"
+    },
+    "channels": {
+      "channels": [
+        "Channel 1: Specific path to customer",
+        "Channel 2: Secondary acquisition",
+        "Channel 3: Growth channel"
+      ],
+      "free_channels": ["Low-cost options"],
+      "paid_channels": ["Paid acquisition"]
+    },
+    "cost_structure": {
+      "fixed_costs": [
+        "Cost 1: Monthly recurring",
+        "Cost 2: Team/infrastructure"
+      ],
+      "variable_costs": [
+        "Cost per customer",
+        "Cost per transaction"
+      ],
+      "estimated_monthly_burn": "$X,XXX"
+    },
+    "revenue_streams": {
+      "model_type": "subscription/transaction/usage/freemium",
+      "streams": [
+        "Primary revenue source",
+        "Secondary income"
+      ],
+      "pricing_hypothesis": "$X per [unit]",
+      "ltv_cac_target": "3:1 or better"
+    }
+  },
+  "canvas_summary": {
+    "business_model_type": "B2B SaaS/Marketplace/etc",
+    "model_strengths": ["Strength 1", "Strength 2"],
+    "model_risks": ["Risk 1", "Risk 2"],
+    "next_steps": [
+      "Immediate action 1",
+      "Validation step 2",
+      "Build priority 3"
+    ]
+  },
+  "one_pager_summary": "Concise 3-paragraph summary suitable for investors or partners"
+}
+
+All Previous Analysis: {{previous_output}}`
       }
     ]
   },
