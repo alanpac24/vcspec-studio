@@ -6,62 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { WorkflowPreview } from "./WorkflowPreview";
 
-const workflows = [
-  {
-    title: "Idea Refiner & Business Canvas",
-    description: "Clarify your idea, define your ICP, and auto-generate a Lean Canvas",
-    path: "/idea-refiner",
-    emoji: "💡",
-  },
-  {
-    title: "Market Research & Insights",
-    description: "Size your market, analyze competitors, and plan customer research",
-    path: "/market-research",
-    emoji: "🔍",
-  },
-  {
-    title: "Offer Design & Packaging",
-    description: "Define your MVP features and create compelling product tiers",
-    path: "/offer-design",
-    emoji: "📦",
-  },
-  {
-    title: "Pricing Strategy Advisor",
-    description: "Choose your pricing model and calculate optimal price points",
-    path: "/pricing-strategy",
-    emoji: "💰",
-  },
-  {
-    title: "Distribution & GTM Planner",
-    description: "Select channels, design your funnel, and build a 90-day launch plan",
-    path: "/gtm-planner",
-    emoji: "🚀",
-  },
-  {
-    title: "Messaging & Copy Generator",
-    description: "Create on-brand copy for landing pages, emails, and social media",
-    path: "/messaging-copy",
-    emoji: "✍️",
-  },
-  {
-    title: "Simple Financials & Milestones",
-    description: "Project revenue, plan expenses, and set key business milestones",
-    path: "/financials",
-    emoji: "📊",
-  },
-  {
-    title: "Risk, Compliance & Ops",
-    description: "Legal templates, brand protection, and operational readiness",
-    path: "/risk-compliance",
-    emoji: "⚖️",
-  },
-  {
-    title: "Investor/Partner One-Pager",
-    description: "Generate pitch materials and elevator pitches from your business data",
-    path: "/investor-one-pager",
-    emoji: "📄",
-  },
-];
+import { workflowCategories } from "@/config/workflows";
 
 export const Dashboard = () => {
   const [commandInput, setCommandInput] = useState("");
@@ -143,18 +88,25 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <div className="px-12 py-6 space-y-10">
-        {/* Start a Workflow Section */}
-        <section>
-          <h2 className="text-base font-semibold mb-4 text-foreground">
-            Start a Workflow
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {workflows.map((workflow) => (
-              <WorkflowCard key={workflow.path} {...workflow} />
-            ))}
+      <div className="px-12 py-6 space-y-8">
+        {workflowCategories.map((category) => (
+          <div key={category.title}>
+            <h2 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">
+              {category.title}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              {category.workflows.map((workflow) => (
+                <WorkflowCard
+                  key={workflow.path}
+                  title={workflow.title}
+                  description={workflow.description}
+                  path={workflow.path}
+                  emoji={workflow.emoji}
+                />
+              ))}
+            </div>
           </div>
-        </section>
+        ))}
       </div>
 
       {/* Workflow Preview Modal */}

@@ -35,28 +35,12 @@ interface LayoutProps {
 
 const navSections = [
   {
-    title: "Build",
+    title: "Quick Access",
     items: [
       { label: "Dashboard", path: "/", icon: LayoutDashboard },
       { label: "Idea Refiner", path: "/idea-refiner", icon: Lightbulb },
-      { label: "Market Research", path: "/market-research", icon: Search },
-      { label: "Offer Design", path: "/offer-design", icon: Package },
       { label: "Pricing Strategy", path: "/pricing-strategy", icon: DollarSign },
-    ],
-  },
-  {
-    title: "Launch",
-    items: [
       { label: "GTM Planner", path: "/gtm-planner", icon: Rocket },
-      { label: "Messaging & Copy", path: "/messaging-copy", icon: PenTool },
-      { label: "Financials", path: "/financials", icon: TrendingUp },
-      { label: "Risk & Compliance", path: "/risk-compliance", icon: Shield },
-    ],
-  },
-  {
-    title: "Grow",
-    items: [
-      { label: "Investor One-Pager", path: "/investor-one-pager", icon: FileText },
     ],
   },
   {
