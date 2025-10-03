@@ -4,14 +4,17 @@ import {
   Menu, 
   X, 
   LayoutDashboard, 
-  Filter, 
-  Calendar, 
-  Database, 
-  Search, 
-  Briefcase, 
+  Lightbulb,
+  Search,
+  Package,
+  DollarSign,
+  Rocket,
+  PenTool,
+  TrendingUp,
+  Shield,
+  FileText,
   Box, 
   Play, 
-  FileText, 
   Settings,
   LogOut,
   User
@@ -32,14 +35,28 @@ interface LayoutProps {
 
 const navSections = [
   {
-    title: "Workflows",
+    title: "Build",
     items: [
       { label: "Dashboard", path: "/", icon: LayoutDashboard },
-      { label: "Dealflow Triage", path: "/dealflow-triage", icon: Filter },
-      { label: "Meeting Preparation", path: "/meeting-prep", icon: Calendar },
-      { label: "CRM Hygiene", path: "/crm-hygiene", icon: Database },
-      { label: "Research & Outbound", path: "/research-outbound", icon: Search },
-      { label: "Portfolio & LP Ops", path: "/portfolio-lp", icon: Briefcase },
+      { label: "Idea Refiner", path: "/idea-refiner", icon: Lightbulb },
+      { label: "Market Research", path: "/market-research", icon: Search },
+      { label: "Offer Design", path: "/offer-design", icon: Package },
+      { label: "Pricing Strategy", path: "/pricing-strategy", icon: DollarSign },
+    ],
+  },
+  {
+    title: "Launch",
+    items: [
+      { label: "GTM Planner", path: "/gtm-planner", icon: Rocket },
+      { label: "Messaging & Copy", path: "/messaging-copy", icon: PenTool },
+      { label: "Financials", path: "/financials", icon: TrendingUp },
+      { label: "Risk & Compliance", path: "/risk-compliance", icon: Shield },
+    ],
+  },
+  {
+    title: "Grow",
+    items: [
+      { label: "Investor One-Pager", path: "/investor-one-pager", icon: FileText },
     ],
   },
   {
@@ -47,13 +64,6 @@ const navSections = [
     items: [
       { label: "Agents Library", path: "/agents", icon: Box },
       { label: "Runs", path: "/runs", icon: Play },
-      { label: "Audit Logs", path: "/audit", icon: FileText },
-    ],
-  },
-  {
-    title: "Configuration",
-    items: [
-      { label: "Settings", path: "/settings", icon: Settings },
     ],
   },
 ];
@@ -74,7 +84,7 @@ export const Layout = ({ children }: LayoutProps) => {
           {/* Sidebar Header */}
           <div className="px-3 py-4 border-b border-sidebar-border flex items-center gap-2">
             <div className="w-6 h-6 bg-foreground" />
-            <span className="font-semibold text-sm text-sidebar-primary">VC Agent Builder</span>
+            <span className="font-semibold text-sm text-sidebar-primary">Vibe Business</span>
           </div>
 
           {/* Navigation */}
