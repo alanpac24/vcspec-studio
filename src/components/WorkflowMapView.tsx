@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { AgentConfigDrawer } from "./AgentConfigDrawer";
-import { WorkflowRunner } from "./WorkflowRunner";
+import { WorkflowRunner } from "./features/WorkflowRunner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Agent {

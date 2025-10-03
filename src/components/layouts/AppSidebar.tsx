@@ -1,23 +1,29 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
-  Box, 
-  Play,
-  ChevronRight,
+  Lightbulb,
+  TrendingUp,
+  Rocket,
+  DollarSign,
+  Building2,
+  BarChart3,
   User,
-  LogOut
+  LogOut,
+  ChevronRight,
+  Box,
+  Play
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
@@ -36,6 +42,16 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { workflowCategories } from "@/config/workflows";
 
+// Category icons mapping
+const categoryIcons: Record<string, any> = {
+  "Product": Lightbulb,
+  "Market": TrendingUp,
+  "Growth": Rocket,
+  "Finance": DollarSign,
+  "Operations": Building2,
+  "Analytics": BarChart3
+};
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
@@ -43,57 +59,46 @@ export function AppSidebar() {
   const currentPath = location.pathname;
 
   const isCollapsed = state === "collapsed";
-
-  const quickAccessItems = [
-    { label: "Dashboard", path: "/", icon: LayoutDashboard },
-  ];
-
-  const managementItems = [
-    { label: "Agents Library", path: "/agents", icon: Box },
-    { label: "Runs", path: "/runs", icon: Play },
-  ];
-
   const isActive = (path: string) => currentPath === path;
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" className="border-r bg-background">
       {/* Header */}
-      <SidebarHeader className="border-b border-sidebar-border p-4">
+      <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-foreground flex-shrink-0" />
+          <div className="w-6 h-6 bg-primary rounded flex-shrink-0" />
           {!isCollapsed && (
-            <span className="font-semibold text-sm text-sidebar-primary">
+            <span className="font-semibold text-base">
               Vibe Business
             </span>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="py-2">
-        {/* Quick Access */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Quick Access</SidebarGroupLabel>
+      <SidebarContent className="px-2">
+        {/* Dashboard Link */}
+        <SidebarGroup className="mb-2">
           <SidebarGroupContent>
             <SidebarMenu>
-              {quickAccessItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton asChild isActive={isActive(item.path)}>
-                      <NavLink to={item.path}>
-                        <Icon className="h-4 w-4" />
-                        <span>{item.label}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={isActive("/")}
+                  className="h-9 text-sm"
+                >
+                  <NavLink to="/" className="flex items-center gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    {!isCollapsed && <span>Dashboard</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         {/* Workflow Categories */}
         {workflowCategories.map((category) => {
+          const CategoryIcon = categoryIcons[category.title] || Lightbulb;
           const hasActiveWorkflow = category.workflows.some((w) =>
             isActive(w.path)
           );
@@ -102,14 +107,17 @@ export function AppSidebar() {
             <Collapsible
               key={category.title}
               defaultOpen={hasActiveWorkflow}
-              className="group/collapsible"
+              className="group/collapsible mb-1"
             >
               <SidebarGroup>
                 <SidebarGroupLabel asChild>
-                  <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-sidebar-accent px-2 py-1.5 rounded-sm transition-colors">
-                    <span className="text-xs uppercase tracking-wider">
-                      {category.title}
-                    </span>
+                  <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-sidebar-accent px-2 py-1.5 rounded-md transition-colors">
+                    <div className="flex items-center gap-2">
+                      <CategoryIcon className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">
+                        {category.title}
+                      </span>
+                    </div>
                     <ChevronRight className="h-3 w-3 transition-transform group-data-[state=open]/collapsible:rotate-90" />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
@@ -121,10 +129,11 @@ export function AppSidebar() {
                           <SidebarMenuButton
                             asChild
                             isActive={isActive(workflow.path)}
+                            className="h-8 pl-7 text-xs"
                           >
-                            <NavLink to={workflow.path}>
-                              <span className="text-base">{workflow.emoji}</span>
-                              <span className="text-xs">{workflow.title}</span>
+                            <NavLink to={workflow.path} className="flex items-center gap-2">
+                              <span className="text-xs">{workflow.emoji}</span>
+                              <span>{workflow.title}</span>
                             </NavLink>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -137,24 +146,37 @@ export function AppSidebar() {
           );
         })}
 
-        {/* Management */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
+        {/* Management Section */}
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground mb-1">
+            MANAGEMENT
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {managementItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton asChild isActive={isActive(item.path)}>
-                      <NavLink to={item.path}>
-                        <Icon className="h-4 w-4" />
-                        <span>{item.label}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={isActive("/agents")}
+                  className="h-8 text-xs"
+                >
+                  <NavLink to="/agents" className="flex items-center gap-2">
+                    <Box className="h-3.5 w-3.5" />
+                    {!isCollapsed && <span>Agents Library</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={isActive("/runs")}
+                  className="h-8 text-xs"
+                >
+                  <NavLink to="/runs" className="flex items-center gap-2">
+                    <Play className="h-3.5 w-3.5" />
+                    {!isCollapsed && <span>Runs</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -162,7 +184,7 @@ export function AppSidebar() {
 
       {/* Footer with User */}
       {user && (
-        <SidebarFooter className="border-t border-sidebar-border p-2">
+        <SidebarFooter className="p-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -172,7 +194,7 @@ export function AppSidebar() {
               >
                 <User className="h-4 w-4" />
                 {!isCollapsed && (
-                  <span className="text-xs truncate">
+                  <span className="text-sm truncate">
                     {user.email?.split("@")[0]}
                   </span>
                 )}

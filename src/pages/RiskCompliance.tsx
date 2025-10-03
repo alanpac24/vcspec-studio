@@ -1,4 +1,4 @@
-import { WorkflowPage } from "@/components/WorkflowPage";
+import { WorkflowPage } from "@/components/features/WorkflowPage";
 
 const RiskCompliance = () => {
   return (

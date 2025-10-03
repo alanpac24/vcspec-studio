@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { AppSidebar } from "@/components/layouts/AppSidebar";
 
 interface LayoutProps {
   children: ReactNode;

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { WorkflowPreview } from "./WorkflowPreview";
+import { WorkflowPreview } from "../WorkflowPreview";
 
 import { workflowCategories } from "@/config/workflows";
 

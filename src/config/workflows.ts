@@ -1,300 +1,277 @@
-// Complete workflow library configuration
-export const workflowCategories = [
+import { WorkflowCategory } from '@/types/workflow';
+
+// Simplified workflow library configuration
+export const workflowCategories: WorkflowCategory[] = [
   {
-    title: "Product & Validation",
+    title: "Product",
     workflows: [
       {
         type: "idea-refiner",
-        title: "Idea Refiner & Business Canvas",
-        description: "Clarify idea, problem/solution, target audience, and generate Lean Canvas",
+        title: "Idea Refiner",
+        description: "Clarify and validate your idea",
         emoji: "💡",
         path: "/idea-refiner"
       },
       {
         type: "mvp-diagnostic",
         title: "MVP Diagnostic",
-        description: "Test if product is launchable MVP or just code",
+        description: "Test product readiness",
         emoji: "🔍",
         path: "/mvp-diagnostic"
       },
       {
         type: "persona-icp",
-        title: "Persona & ICP Builder",
-        description: "Define ideal customers and early adopters",
+        title: "Customer Personas",
+        description: "Define ideal customers",
         emoji: "👥",
         path: "/persona-icp"
       },
       {
         type: "feedback-loop",
-        title: "Feedback Loop Setup",
-        description: "Build channels for structured user input",
+        title: "Feedback System",
+        description: "Collect user input",
         emoji: "🔄",
         path: "/feedback-loop"
-      }
-    ]
-  },
-  {
-    title: "Market & Customer",
-    workflows: [
-      {
-        type: "market-sizing",
-        title: "TAM/SAM/SOM Analyzer",
-        description: "Estimate market size and opportunity",
-        emoji: "📊",
-        path: "/market-sizing"
       },
-      {
-        type: "competitor-analysis",
-        title: "Competitor Benchmark Map",
-        description: "Identify differentiation vs competitors",
-        emoji: "🎯",
-        path: "/competitor-analysis"
-      },
-      {
-        type: "traction-tracker",
-        title: "Early Traction Tracker",
-        description: "Measure signals of demand",
-        emoji: "📈",
-        path: "/traction-tracker"
-      }
-    ]
-  },
-  {
-    title: "Monetization & Pricing",
-    workflows: [
-      {
-        type: "pricing-strategy",
-        title: "Pricing Strategy Advisor",
-        description: "Recommend best-fit pricing model",
-        emoji: "💰",
-        path: "/pricing-strategy"
-      },
-      {
-        type: "offer-packaging",
-        title: "Pricing Structure",
-        description: "Create pricing tiers and packages",
-        emoji: "📦",
-        path: "/offer-packaging"
-      },
-      {
-        type: "revenue-simulator",
-        title: "Revenue Simulator",
-        description: "Model revenue scenarios",
-        emoji: "💵",
-        path: "/revenue-simulator"
-      }
-    ]
-  },
-  {
-    title: "Social Media & Growth",
-    workflows: [
-      {
-        type: "social-strategy",
-        title: "Social Media Strategy Builder",
-        description: "Plan growth via right channels",
-        emoji: "📱",
-        path: "/social-strategy"
-      },
-      {
-        type: "content-calendar",
-        title: "Content Calendar Generator",
-        description: "Create 30-day post plan",
-        emoji: "📅",
-        path: "/content-calendar"
-      },
-      {
-        type: "launch-checklist",
-        title: "Launch Checklist",
-        description: "Manage launch campaigns",
-        emoji: "🚀",
-        path: "/launch-checklist"
-      },
-      {
-        type: "community-playbook",
-        title: "Community Playbook",
-        description: "Build early community",
-        emoji: "🤝",
-        path: "/community-playbook"
-      }
-    ]
-  },
-  {
-    title: "Go-to-Market & Distribution",
-    workflows: [
-      {
-        type: "gtm-planner",
-        title: "GTM Planner",
-        description: "Plan 90-day GTM roadmap",
-        emoji: "🎯",
-        path: "/gtm-planner"
-      },
-      {
-        type: "funnel-designer",
-        title: "Funnel Designer",
-        description: "Map customer journey funnel",
-        emoji: "🔀",
-        path: "/funnel-designer"
-      },
-      {
-        type: "messaging",
-        title: "Messaging Agent",
-        description: "Create launch messaging",
-        emoji: "✍️",
-        path: "/messaging"
-      }
-    ]
-  },
-  {
-    title: "Operations & Team",
-    workflows: [
-      {
-        type: "legal-ops",
-        title: "Legal Ops Agent",
-        description: "Guide incorporation and founder docs",
-        emoji: "⚖️",
-        path: "/legal-ops"
-      },
-      {
-        type: "hiring",
-        title: "Hiring Agent",
-        description: "Suggest first hires and roles",
-        emoji: "👔",
-        path: "/hiring"
-      },
-      {
-        type: "productivity",
-        title: "Productivity Agent",
-        description: "Suggest productivity stack",
-        emoji: "⚡",
-        path: "/productivity"
-      }
-    ]
-  },
-  {
-    title: "Regulation & Compliance",
-    workflows: [
-      {
-        type: "privacy-security",
-        title: "Privacy & Security Agent",
-        description: "Generate compliance checklist",
-        emoji: "🔒",
-        path: "/privacy-security"
-      },
-      {
-        type: "legal-docs",
-        title: "Legal Docs Agent",
-        description: "Draft key legal documents",
-        emoji: "📄",
-        path: "/legal-docs"
-      },
-      {
-        type: "risk-ip",
-        title: "Risk & IP Agent",
-        description: "Highlight legal and IP risks",
-        emoji: "🛡️",
-        path: "/risk-ip"
-      }
-    ]
-  },
-  {
-    title: "Financials & Runway",
-    workflows: [
-      {
-        type: "runway",
-        title: "Runway Agent",
-        description: "Calculate financial runway",
-        emoji: "⏱️",
-        path: "/runway"
-      },
-      {
-        type: "forecast",
-        title: "Forecast Agent",
-        description: "Build 12-month financial projection",
-        emoji: "📉",
-        path: "/forecast"
-      },
-      {
-        type: "cap-table",
-        title: "Cap Table Agent",
-        description: "Manage equity and dilution",
-        emoji: "💼",
-        path: "/cap-table"
-      }
-    ]
-  },
-  {
-    title: "Fundraising & Storytelling",
-    workflows: [
-      {
-        type: "investor-one-pager",
-        title: "Investor One-Pager",
-        description: "Create startup summary document",
-        emoji: "📑",
-        path: "/investor-one-pager"
-      },
-      {
-        type: "pitch-deck",
-        title: "Pitch Deck Agent",
-        description: "Build investor pitch deck",
-        emoji: "🎤",
-        path: "/pitch-deck"
-      },
-      {
-        type: "milestone-roadmap",
-        title: "Milestone Agent",
-        description: "Align roadmap with funding needs",
-        emoji: "🗺️",
-        path: "/milestone-roadmap"
-      }
-    ]
-  },
-  {
-    title: "Brand & Identity",
-    workflows: [
       {
         type: "narrative",
-        title: "Narrative Agent",
-        description: "Build founder story",
+        title: "Brand Story",
+        description: "Build your narrative",
         emoji: "📖",
         path: "/narrative"
       },
       {
         type: "naming",
-        title: "Naming Agent",
-        description: "Suggest startup names",
+        title: "Name Generator",
+        description: "Create brand names",
         emoji: "🏷️",
         path: "/naming"
       },
       {
         type: "visual-kit",
-        title: "Visual Kit Agent",
-        description: "Draft lightweight visual identity",
+        title: "Visual Identity",
+        description: "Design brand assets",
         emoji: "🎨",
         path: "/visual-kit"
       }
     ]
   },
   {
-    title: "Analytics & Metrics",
+    title: "Market",
+    workflows: [
+      {
+        type: "market-sizing",
+        title: "Market Size",
+        description: "TAM/SAM/SOM analysis",
+        emoji: "📊",
+        path: "/market-sizing"
+      },
+      {
+        type: "competitor-analysis",
+        title: "Competitor Map",
+        description: "Analyze competition",
+        emoji: "🎯",
+        path: "/competitor-analysis"
+      },
+      {
+        type: "traction-tracker",
+        title: "Traction Metrics",
+        description: "Track market demand",
+        emoji: "📈",
+        path: "/traction-tracker"
+      },
+      {
+        type: "pricing-strategy",
+        title: "Pricing Strategy",
+        description: "Set pricing model",
+        emoji: "💰",
+        path: "/pricing-strategy"
+      },
+      {
+        type: "offer-packaging",
+        title: "Price Tiers",
+        description: "Create packages",
+        emoji: "📦",
+        path: "/offer-packaging"
+      },
+      {
+        type: "revenue-simulator",
+        title: "Revenue Model",
+        description: "Project revenue",
+        emoji: "💵",
+        path: "/revenue-simulator"
+      }
+    ]
+  },
+  {
+    title: "Growth",
+    workflows: [
+      {
+        type: "gtm-planner",
+        title: "GTM Strategy",
+        description: "90-day launch plan",
+        emoji: "🎯",
+        path: "/gtm-planner"
+      },
+      {
+        type: "funnel-designer",
+        title: "Sales Funnel",
+        description: "Customer journey",
+        emoji: "🔀",
+        path: "/funnel-designer"
+      },
+      {
+        type: "messaging",
+        title: "Messaging",
+        description: "Marketing copy",
+        emoji: "✍️",
+        path: "/messaging"
+      },
+      {
+        type: "social-strategy",
+        title: "Social Strategy",
+        description: "Channel planning",
+        emoji: "📱",
+        path: "/social-strategy"
+      },
+      {
+        type: "content-calendar",
+        title: "Content Plan",
+        description: "30-day calendar",
+        emoji: "📅",
+        path: "/content-calendar"
+      },
+      {
+        type: "launch-checklist",
+        title: "Launch Plan",
+        description: "Launch checklist",
+        emoji: "🚀",
+        path: "/launch-checklist"
+      },
+      {
+        type: "community-playbook",
+        title: "Community",
+        description: "Build engagement",
+        emoji: "🤝",
+        path: "/community-playbook"
+      }
+    ]
+  },
+  {
+    title: "Finance",
+    workflows: [
+      {
+        type: "runway",
+        title: "Cash Runway",
+        description: "Financial timeline",
+        emoji: "⏱️",
+        path: "/runway"
+      },
+      {
+        type: "forecast",
+        title: "Projections",
+        description: "12-month forecast",
+        emoji: "📉",
+        path: "/forecast"
+      },
+      {
+        type: "cap-table",
+        title: "Cap Table",
+        description: "Equity management",
+        emoji: "💼",
+        path: "/cap-table"
+      },
+      {
+        type: "investor-one-pager",
+        title: "One-Pager",
+        description: "Executive summary",
+        emoji: "📑",
+        path: "/investor-one-pager"
+      },
+      {
+        type: "pitch-deck",
+        title: "Pitch Deck",
+        description: "Investor presentation",
+        emoji: "🎤",
+        path: "/pitch-deck"
+      },
+      {
+        type: "milestone-roadmap",
+        title: "Milestones",
+        description: "Funding roadmap",
+        emoji: "🗺️",
+        path: "/milestone-roadmap"
+      }
+    ]
+  },
+  {
+    title: "Operations",
+    workflows: [
+      {
+        type: "legal-ops",
+        title: "Incorporation",
+        description: "Company setup",
+        emoji: "⚖️",
+        path: "/legal-ops"
+      },
+      {
+        type: "hiring",
+        title: "Team Building",
+        description: "Hiring strategy",
+        emoji: "👔",
+        path: "/hiring"
+      },
+      {
+        type: "productivity",
+        title: "Tech Stack",
+        description: "Tool selection",
+        emoji: "⚡",
+        path: "/productivity"
+      },
+      {
+        type: "privacy-security",
+        title: "Compliance",
+        description: "Privacy & security",
+        emoji: "🔒",
+        path: "/privacy-security"
+      },
+      {
+        type: "legal-docs",
+        title: "Legal Docs",
+        description: "Key documents",
+        emoji: "📄",
+        path: "/legal-docs"
+      },
+      {
+        type: "risk-ip",
+        title: "Risk & IP",
+        description: "Legal protection",
+        emoji: "🛡️",
+        path: "/risk-ip"
+      }
+    ]
+  },
+  {
+    title: "Analytics",
     workflows: [
       {
         type: "metrics",
-        title: "Metrics Agent",
-        description: "Track key SaaS metrics",
+        title: "Key Metrics",
+        description: "Track KPIs",
         emoji: "📊",
         path: "/metrics"
       },
       {
         type: "retention",
-        title: "Retention Agent",
-        description: "Show user retention analysis",
+        title: "Retention",
+        description: "User analysis",
         emoji: "🔁",
         path: "/retention"
       },
       {
         type: "funnel-analytics",
-        title: "Funnel Agent",
-        description: "Track acquisition to conversion",
+        title: "Conversion",
+        description: "Funnel tracking",
         emoji: "📉",
         path: "/funnel-analytics"
       }
