@@ -1,72 +1,51 @@
-import { useState, useEffect } from "react";
-import { WorkflowMapView } from "@/components/WorkflowMapView";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { DealFlowWorkflow } from "@/components/DealFlowWorkflow";
+import { StepPreview } from "@/components/StepPreview";
+import { DealScore } from "@/components/DealScoreCard";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 const DealflowTriage = () => {
-  const [workflowId, setWorkflowId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [currentScore, setCurrentScore] = useState<DealScore | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
 
-  useEffect(() => {
-    loadWorkflow();
-  }, []);
-
-  const loadWorkflow = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .select('id')
-        .eq('workflow_type', 'dealflow-triage')
-        .single();
-
-      if (error) {
-        console.error('Error loading workflow:', error);
-      } else {
-        setWorkflowId(data?.id || null);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleScoreGenerated = (score: DealScore) => {
+    setCurrentScore(score);
   };
 
-  const navigate = useNavigate();
+  const handleProcessingChange = (processing: boolean) => {
+    setIsProcessing(processing);
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin text-grey-400" />
-      </div>
-    );
-  }
+  const handleActiveStepChange = (step: number) => {
+    setActiveStep(step);
+  };
 
-  if (!workflowId) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center max-w-md">
-          <h2 className="text-2xl font-bold text-foreground mb-3">No Dealflow Triage Workflow</h2>
-          <p className="text-sm text-grey-500 mb-6">
-            Create a workflow to automatically capture, enrich, score, and route inbound deals.
-          </p>
-          <Button 
-            onClick={() => navigate('/')}
-            className="bg-primary text-primary-foreground hover:bg-grey-800"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create Workflow
-          </Button>
-          <p className="text-xs text-grey-400 mt-4">
-            Use the search bar to say: "Set up dealflow triage"
-          </p>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div className="h-full w-full">
+      <ResizablePanelGroup direction="horizontal">
+        {/* Left Panel - Workflow Steps */}
+        <ResizablePanel defaultSize={40} minSize={35} maxSize={55}>
+          <DealFlowWorkflow
+            onScoreGenerated={handleScoreGenerated}
+            onProcessingChange={handleProcessingChange}
+            onActiveStepChange={handleActiveStepChange}
+          />
+        </ResizablePanel>
 
-  return <WorkflowMapView title="Dealflow Triage" workflowId={workflowId} />;
+        <ResizableHandle withHandle />
+
+        {/* Right Panel - Step Preview/Results */}
+        <ResizablePanel defaultSize={60} minSize={45}>
+          <StepPreview
+            activeStep={activeStep}
+            currentScore={currentScore}
+            isProcessing={isProcessing}
+          />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
+  );
 };
 
 export default DealflowTriage;
