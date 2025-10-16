@@ -37,7 +37,7 @@ const workflowSteps = [
     title: "Apply & Export",
     description: "Execute cleanup and download",
   },
-};
+];
 
 const cleanupOperations = [
   { id: "dedupe", label: "Remove Duplicates", description: "Find and merge duplicate contacts" },

@@ -40,7 +40,7 @@ const workflowSteps = [
     title: "Draft Outreach",
     description: "Generate personalized emails",
   },
-};
+];
 
 export const ResearchOutboundWorkflow = ({
   onResultsGenerated,
